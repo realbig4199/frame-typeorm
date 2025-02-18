@@ -1,0 +1,15 @@
+services:
+  recipot-mariadb:
+    container_name: recipot-mariadb
+    image: mariadb:10.8.2
+    ports: 
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: recipot
+      MYSQL_USER: recipot
+      MYSQL_PASSWORD: recipot1!11
+      MYSQL_ROOT_PASSWORD: recipot1!11
+      TZ: UTC
+    volumes:
+      - ./docker/mariadb/data:/var/lib/mysql
+    restart: always
