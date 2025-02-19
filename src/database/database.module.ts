@@ -1,6 +1,11 @@
 import { ConfigService } from '@/config/config.service';
 import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DatabaseService } from './database.service';
+import { UserDao } from '@/user/dao/user.dao';
+import { LoginDao } from '@/user/dao/login.dao';
+
+const ENTITIES = [UserDao, LoginDao];
 
 @Global()
 @Module({
@@ -10,13 +15,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       useFactory: async (configService: ConfigService) => {
         return {
           ...configService.get('database'),
-          entities: [__dirname + '@/**/*.dao{.ts,.js}'],
-          synchronize: false,
+          entities: ENTITIES,
+          synchronize: true,
         };
       },
     }),
+    TypeOrmModule.forFeature(ENTITIES),
   ],
-  providers: [],
-  exports: [],
+  providers: [DatabaseService],
+  exports: [DatabaseService, TypeOrmModule],
 })
 export class DatabaseModule {}
