@@ -23,6 +23,22 @@ export const loadConfig = async (processEnv: any) => {
       accessExpire: parseInt(processEnv.JWT_ACCESS_EXPIRE) || 3600,
       refreshExpire: parseInt(processEnv.JWT_REFRESH_EXPIRE) || 86400,
     },
+    redis: {
+      type: processEnv.REDIS_CONNECTION_TYPE || 'single',
+      host: processEnv.REDIS_CONNECTION_HOST || 'localhost',
+      port: parseInt(processEnv.REDIS_CONNECTION_PORT) || 6379,
+      url: `redis://${processEnv.REDIS_CONNECTION_HOST || 'localhost'}:${
+        parseInt(processEnv.REDIS_CONNECTION_PORT) || 6379
+      }`,
+      options: {
+        username: processEnv.REDIS_CONNECTION_USER || 'dev',
+        password: processEnv.REDIS_CONNECTION_PWD || 'dev1!11',
+        ttl: parseInt(processEnv.REDIS_CONNECTION_TTL) || 0,
+        retryAttempts:
+          parseInt(processEnv.REDIS_CONNECTION_RETRY_ATTEMPTS) || 5,
+        retryDelay: parseInt(processEnv.REDIS_CONNECTION_RETRY_DELAY) || 3000,
+      },
+    },
   };
 
   return config;

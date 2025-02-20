@@ -5,10 +5,16 @@ import { SignUpDtoTx } from './dto/user.dto';
 import { CommonRx } from '@/common/common.dto';
 import * as brcypt from 'bcryptjs';
 import { UserDao } from './dao/user.dao';
+import { ConfigService } from '@/config/config.service';
+import { CacheService } from '@/cache/cache.service';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly config: ConfigService,
+    private readonly cache: CacheService,
+  ) {}
 
   /**
    * @author 김진태 <realbig4199@gmail.com>
