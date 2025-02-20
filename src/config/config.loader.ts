@@ -16,6 +16,13 @@ export const loadConfig = async (processEnv: any) => {
       path: processEnv.SWAGGER_PATH || '/api/document',
       json: processEnv.SWAGGER_JSON || '/api/json',
     },
+    jwt: {
+      issuer: processEnv.JWT_ISSUER || '',
+      audience: processEnv.JWT_AUDIENCE || '',
+      secret: processEnv.JWT_SECRET || '',
+      accessExpire: parseInt(processEnv.JWT_ACCESS_EXPIRE) || 3600,
+      refreshExpire: parseInt(processEnv.JWT_REFRESH_EXPIRE) || 86400,
+    },
   };
 
   return config;
