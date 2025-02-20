@@ -2,16 +2,21 @@ import { DatabaseService } from '@/database/database.service';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoginDao } from './dao/login.dao';
 import { SignUpDtoTx } from './dto/user.dto';
-import { CommonRx } from '@/common/common.dto';
+import { v4 as uuidv4 } from 'uuid';
 import * as brcypt from 'bcryptjs';
 import { UserDao } from './dao/user.dao';
 import { ConfigService } from '@/config/config.service';
 import { CacheService } from '@/cache/cache.service';
+import { JwtToken } from '@/jwt/jwt.dto';
+import { AccessTokenPayload, RefreshTokenPayload } from '@/jwt/jwt.type';
+import { JwtUtils } from '@/jwt/jwt.utils';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly databaseService: DatabaseService,
+    private readonly jwt: JwtService,
     private readonly config: ConfigService,
     private readonly cache: CacheService,
   ) {}
@@ -20,7 +25,7 @@ export class UserService {
    * @author 김진태 <realbig4199@gmail.com>
    * @description 유저를 생성한다. (회원가입)
    */
-  public async signUp(dto: SignUpDtoTx): Promise<CommonRx> {
+  public async signUp(dto: SignUpDtoTx): Promise<JwtToken> {
     try {
       return await this.databaseService.transaction(async (manager) => {
         const loginRepository = manager.getRepository(LoginDao);
@@ -31,10 +36,10 @@ export class UserService {
         });
 
         if (existingUser) {
-          return {
-            statusCode: HttpStatus.CONFLICT,
-            message: `${dto.passid}의 유저는 이미 존재합니다.`,
-          };
+          throw new HttpException(
+            `${dto.passid}의 유저는 이미 존재합니다.`,
+            HttpStatus.CONFLICT,
+          );
         }
 
         const hashedPassword = await brcypt.hash(dto.password, 10);
@@ -49,12 +54,34 @@ export class UserService {
           login: newLogin,
         });
 
-        await userRepository.save(newUser);
-
-        return {
-          statusCode: HttpStatus.CREATED,
-          message: '회원가입 성공',
+        const accessPayload: AccessTokenPayload = {
+          sub: newUser.uuid,
+          aud: this.config.get('jwt.audience'),
+          iss: this.config.get('jwt.issuer'),
+          jti: uuidv4(),
+          userUuid: newUser.uuid,
         };
+
+        const refreshPayload: RefreshTokenPayload = {
+          sub: newUser.uuid,
+          aud: this.config.get('jwt.audience'),
+          iss: this.config.get('jwt.issuer'),
+          jti: uuidv4(),
+          userUuid: newUser.uuid,
+        };
+
+        const token = await JwtUtils.generateToken(
+          this.jwt,
+          this.config.get('jwt.secret'),
+          this.config.get('jwt.accessExpire'),
+          this.config.get('jwt.refreshExpire'),
+          accessPayload,
+          refreshPayload,
+        );
+
+        await this.cache.set(newUser.id.toString(), token.refreshToken);
+
+        return token;
       });
     } catch (err) {
       if (err instanceof HttpException) {

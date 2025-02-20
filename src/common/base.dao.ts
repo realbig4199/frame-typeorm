@@ -13,10 +13,10 @@ export abstract class BaseDao extends BaseEntity {
   @PrimaryGeneratedColumn()
   public id: number;
 
-  @Column({ unique: true })
+  @Column({ unique: true, default: () => 'UUID()' })
   public uuid: string;
 
-  @Column()
+  @Column({ default: State.Activation })
   public state: string;
 
   @CreateDateColumn()
@@ -24,14 +24,4 @@ export abstract class BaseDao extends BaseEntity {
 
   @UpdateDateColumn()
   public updatedAt: Date;
-
-  @BeforeInsert()
-  generateFields() {
-    if (!this.uuid) {
-      this.uuid = uuidv4();
-    }
-    if (!this.state) {
-      this.state = State.Activation;
-    }
-  }
 }

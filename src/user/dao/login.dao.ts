@@ -1,4 +1,4 @@
-import { Column, Entity, OneToOne, JoinColumn } from 'typeorm';
+import { Column, Entity, OneToOne, JoinColumn, BeforeInsert } from 'typeorm';
 import { BaseDao } from '@/common/base.dao';
 import { UserDao } from '@/user/dao/user.dao';
 
