@@ -13,3 +13,15 @@ services:
     volumes:
       - ./docker/mariadb/data:/var/lib/mysql
     restart: always
+
+  recipot-redis:
+    container_name: recipot-redis
+    image: redis:7.2.4-alpine3.19
+    ports:
+      - 6379:6379
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./docker/redis/data:/data
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./docker/redis/user.acl:/usr/local/etc/redis/user.acl
+    restart: always
