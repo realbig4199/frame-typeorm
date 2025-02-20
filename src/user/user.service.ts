@@ -5,7 +5,6 @@ import { SignUpDtoTx } from './dto/user.dto';
 import { CommonRx } from '@/common/common.dto';
 import * as brcypt from 'bcryptjs';
 import { UserDao } from './dao/user.dao';
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UserService {
@@ -34,13 +33,12 @@ export class UserService {
 
         const hashedPassword = await brcypt.hash(dto.password, 10);
 
-        const newLogin = loginRepository.create({
+        const newLogin = await loginRepository.save({
           passid: dto.passid,
           password: hashedPassword,
         });
-        await loginRepository.save(newLogin);
 
-        const newUser = userRepository.create({
+        const newUser = await userRepository.save({
           name: dto.name,
           login: newLogin,
         });

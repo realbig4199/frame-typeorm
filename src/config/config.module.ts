@@ -1,34 +1,30 @@
 import * as fs from 'fs';
 import { resolve } from 'path';
 
-import { DynamicModule, Module, Provider } from '@nestjs/common';
-import { ConfigModuleOptions } from '@nestjs/config';
+import { Module } from '@nestjs/common';
 import * as dotenv from 'dotenv';
-import { DotenvExpandOptions, expand } from 'dotenv-expand';
 
 import { loadConfig } from '@/config/config.loader';
 import { ConfigService } from '@/config/config.service';
+import { ConfigModuleOptions } from '@nestjs/config';
 
 @Module({})
 export class ConfigModule {
-  public static forRootAsync(options: ConfigModuleOptions = {}): DynamicModule {
-    const provider: Provider = {
+  public static forRootAsync(options: ConfigModuleOptions = {}) {
+    const provider = {
       provide: ConfigService,
       useFactory: async () => {
         const envFilePaths = Array.isArray(options.envFilePath)
           ? options.envFilePath
           : [options.envFilePath || resolve(process.cwd(), '.env')];
-        let config = this.loadEnvFile(envFilePaths, options);
-        if (!options.ignoreEnvVars) {
-          config = {
-            ...config,
-            ...process.env,
-          };
-        }
+
+        const config = this.loadEnvFile(envFilePaths);
+
         const record = await loadConfig(config);
         return new ConfigService(record);
       },
     };
+
     return {
       global: options.isGlobal,
       module: ConfigModule,
@@ -37,10 +33,7 @@ export class ConfigModule {
     };
   }
 
-  private static loadEnvFile(
-    envFilePaths: string[],
-    options: ConfigModuleOptions,
-  ): Record<string, any> {
+  private static loadEnvFile(envFilePaths: string[]): Record<string, any> {
     let config: ReturnType<typeof dotenv.parse> = {};
     for (const envFilePath of envFilePaths) {
       if (fs.existsSync(envFilePath)) {
@@ -48,14 +41,6 @@ export class ConfigModule {
           dotenv.parse(fs.readFileSync(envFilePath)),
           config,
         );
-        if (options.expandVariables) {
-          const expandOptions: DotenvExpandOptions =
-            typeof options.expandVariables === 'object'
-              ? options.expandVariables
-              : {};
-          config =
-            expand({ ...expandOptions, parsed: config }).parsed || config;
-        }
       }
     }
     return config;

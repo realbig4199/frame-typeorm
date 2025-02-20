@@ -25,7 +25,6 @@ export abstract class BaseDao extends BaseEntity {
   @UpdateDateColumn()
   public updatedAt: Date;
 
-  // ✅ 자동 값 할당
   @BeforeInsert()
   generateFields() {
     if (!this.uuid) {
