@@ -1,7 +1,7 @@
 import { DatabaseService } from '@/database/database.service';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoginDao } from './dao/login.dao';
-import { SignUpDtoTx } from './dto/user.dto';
+import { GetUsersDtoRx, SignUpDtoTx } from './dto/user.dto';
 import { v4 as uuidv4 } from 'uuid';
 import * as brcypt from 'bcryptjs';
 import { UserDao } from './dao/user.dao';
@@ -9,17 +9,71 @@ import { ConfigService } from '@/config/config.service';
 import { CacheService } from '@/cache/cache.service';
 import { JwtToken } from '@/jwt/jwt.dto';
 import { AccessTokenPayload, RefreshTokenPayload } from '@/jwt/jwt.type';
-import { JwtUtils } from '@/jwt/jwt.utils';
-import { JwtService } from '@nestjs/jwt';
+import { PaginationDtoTx } from '@/common/pagination.dto';
+import { JwtAuthService } from '@/jwt/jwt.service';
+import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 
 @Injectable()
 export class UserService {
   constructor(
-    private readonly databaseService: DatabaseService,
-    private readonly jwt: JwtService,
+    private readonly database: DatabaseService,
+    private readonly jwt: JwtAuthService,
     private readonly config: ConfigService,
     private readonly cache: CacheService,
   ) {}
+
+  /**
+   * @author 김진태 <reabig4199@gmail.com>
+   * @description 유저를 조회한다.
+   */
+  public async getUsers(
+    user: AccessTokenPayload,
+    query: PaginationDtoTx,
+  ): Promise<GetUsersDtoRx> {
+    try {
+      return await this.database.transaction(async (manager) => {
+        const loginRepository = manager.getRepository(LoginDao);
+        const userRepository = manager.getRepository(UserDao);
+
+        const { startDate, endDate, offset, limit, sortBy, order } = query;
+
+        const users = await userRepository.find({
+          where: [
+            { createdAt: MoreThanOrEqual(new Date(startDate)) },
+            { createdAt: LessThanOrEqual(new Date(endDate)) },
+          ],
+          skip: offset,
+          take: limit,
+          order: {
+            [sortBy]: order,
+          },
+          relations: ['login'],
+        });
+
+        console.log(users);
+
+        const userDtos = users.map((user) => ({
+          userUuid: user.uuid,
+          name: user.name,
+          passid: user.login.passid,
+        }));
+
+        return {
+          users: userDtos,
+        };
+      });
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        console.log(err); // 추후 수정
+        throw new HttpException(
+          '유저 조회에 실패했습니다',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
 
   /**
    * @author 김진태 <realbig4199@gmail.com>
@@ -27,7 +81,7 @@ export class UserService {
    */
   public async signUp(dto: SignUpDtoTx): Promise<JwtToken> {
     try {
-      return await this.databaseService.transaction(async (manager) => {
+      return await this.database.transaction(async (manager) => {
         const loginRepository = manager.getRepository(LoginDao);
         const userRepository = manager.getRepository(UserDao);
 
@@ -54,32 +108,24 @@ export class UserService {
           login: newLogin,
         });
 
-        const accessPayload: AccessTokenPayload = {
-          sub: newUser.uuid,
-          aud: this.config.get('jwt.audience'),
-          iss: this.config.get('jwt.issuer'),
-          jti: uuidv4(),
-          userUuid: newUser.uuid,
-        };
+        const accessPayload: AccessTokenPayload =
+          await this.jwt.generatePayload(newUser.uuid);
 
-        const refreshPayload: RefreshTokenPayload = {
-          sub: newUser.uuid,
-          aud: this.config.get('jwt.audience'),
-          iss: this.config.get('jwt.issuer'),
-          jti: uuidv4(),
-          userUuid: newUser.uuid,
-        };
+        const refreshPayload: RefreshTokenPayload =
+          await this.jwt.generatePayload(newUser.uuid);
 
-        const token = await JwtUtils.generateToken(
-          this.jwt,
-          this.config.get('jwt.secret'),
-          this.config.get('jwt.accessExpire'),
-          this.config.get('jwt.refreshExpire'),
+        const token = await this.jwt.generateToken(
           accessPayload,
           refreshPayload,
         );
 
-        await this.cache.set(newUser.id.toString(), token.refreshToken);
+        await this.cache.set(
+          newUser.id.toString(),
+          token.refreshToken,
+          86400 * 1000,
+        );
+
+        return token;
 
         return token;
       });

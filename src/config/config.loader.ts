@@ -17,6 +17,7 @@ export const loadConfig = async (processEnv: any) => {
       json: processEnv.SWAGGER_JSON || '/api/json',
     },
     jwt: {
+      algorithm: processEnv.JWT_ALGORITHM || '',
       issuer: processEnv.JWT_ISSUER || '',
       audience: processEnv.JWT_AUDIENCE || '',
       secret: processEnv.JWT_SECRET || '',
