@@ -1,18 +1,13 @@
 import { Module } from '@nestjs/common';
-import {
-  JwtModule as NestJwtModule,
-  JwtService as NestJwtService,
-} from '@nestjs/jwt';
+import { JwtModule as NestJwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+
+import { JwtAuthService } from './jwt.service';
 
 import { ConfigService } from '@/config/config.service';
 import { JwtGuard } from '@/jwt/jwt.guard';
 import { JwtStrategy } from '@/jwt/jwt.stratgey';
 
-/**
- * @author 이현수 <keyclops93483@keyclops.com>
- * @description JWT 모듈
- */
 @Module({
   imports: [
     PassportModule,
@@ -21,7 +16,7 @@ import { JwtStrategy } from '@/jwt/jwt.stratgey';
       useFactory: (config: ConfigService) => ({}),
     }),
   ],
-  providers: [JwtStrategy, JwtGuard, NestJwtService],
-  exports: [JwtStrategy, JwtGuard, NestJwtService],
+  providers: [JwtStrategy, JwtGuard, JwtAuthService],
+  exports: [JwtStrategy, JwtGuard, JwtAuthService],
 })
 export class JwtModule {}
