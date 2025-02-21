@@ -1,10 +1,9 @@
 import { DatabaseService } from '@/database/database.service';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoginDao } from './dao/login.dao';
-import { GetUsersDtoRx, SignUpDtoTx } from './dto/user.dto';
-import { v4 as uuidv4 } from 'uuid';
+import { GetUserDtoRx, GetUsersDtoRx, SignUpDtoTx } from './dto/user.dto';
 import * as brcypt from 'bcryptjs';
-import { UserDao } from './dao/user.dao';
+import { UserDao } from '@/user/dao/user.dao';
 import { ConfigService } from '@/config/config.service';
 import { CacheService } from '@/cache/cache.service';
 import { JwtToken } from '@/jwt/jwt.dto';
@@ -32,7 +31,6 @@ export class UserService {
   ): Promise<GetUsersDtoRx> {
     try {
       return await this.database.transaction(async (manager) => {
-        const loginRepository = manager.getRepository(LoginDao);
         const userRepository = manager.getRepository(UserDao);
 
         const { startDate, endDate, offset, limit, sortBy, order } = query;
@@ -50,8 +48,6 @@ export class UserService {
           relations: ['login'],
         });
 
-        console.log(users);
-
         const userDtos = users.map((user) => ({
           userUuid: user.uuid,
           name: user.name,
@@ -60,6 +56,49 @@ export class UserService {
 
         return {
           users: userDtos,
+        };
+      });
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        console.log(err); // 추후 수정
+        throw new HttpException(
+          '유저 조회에 실패했습니다',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  /**
+   * @author 김진태 <realbig419@keyclops.com>
+   * @description 유저를 상세조회한다.
+   */
+  public async getUser(
+    user: AccessTokenPayload,
+    uuid: string,
+  ): Promise<GetUserDtoRx> {
+    try {
+      return await this.database.transaction(async (manager) => {
+        const userRepository = manager.getRepository(UserDao);
+
+        const user = await userRepository.findOne({
+          where: { uuid },
+          relations: ['login'],
+        });
+
+        if (!user) {
+          throw new HttpException(
+            `${uuid}의 유저를 찾을 수 없습니다.`,
+            HttpStatus.NOT_FOUND,
+          );
+        }
+
+        return {
+          userUuid: user.uuid,
+          name: user.name,
+          passid: user.login.passid,
         };
       });
     } catch (err) {

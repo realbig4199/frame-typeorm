@@ -7,6 +7,7 @@ import {
   UseGuards,
   Request,
   Query,
+  Param,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserService } from '@/user/user.service';
@@ -31,6 +32,22 @@ export class UserController {
   async getUsers(@Request() request: any, @Query() query: PaginationDtoTx) {
     try {
       return await this.userService.getUsers(request.user, query);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  /**
+   * @author 김진태 <realbig419@keyclops.com>
+   * @description 유저를 상세조회한다.
+   */
+  // @UseGuards(JwtGuard)
+  @Get('/:uuid')
+  @ApiOperation({ summary: '유저를 상세조회한다.' })
+  @ApiResponse({ status: HttpStatus.OK, type: GetUserDtoRx })
+  async getUser(@Request() request: any, @Param('uuid') uuid: string) {
+    try {
+      return await this.userService.getUser(request.user, uuid);
     } catch (err) {
       throw err;
     }
