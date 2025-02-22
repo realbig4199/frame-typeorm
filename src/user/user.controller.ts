@@ -9,6 +9,7 @@ import {
   Query,
   Param,
   Put,
+  Delete,
 } from '@nestjs/common';
 import {
   ApiExtraModels,
@@ -80,6 +81,22 @@ export class UserController {
   ) {
     try {
       return await this.userService.updateUser(request.user, uuid, dto);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  /**
+   * @author 김진태 <realbig4199@gmail.com>
+   * @description 유저를 삭제한다.
+   */
+  // @UseGuards(JwtGuard)
+  @Delete('/:uuid')
+  @ApiOperation({ summary: '유저를 삭제한다.' })
+  @ApiResponse({ status: HttpStatus.OK, type: CommonRx })
+  async deleteUser(@Request() request: any, @Param('uuid') uuid: string) {
+    try {
+      return await this.userService.deleteUser(request.user, uuid);
     } catch (err) {
       throw err;
     }

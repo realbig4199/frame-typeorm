@@ -15,8 +15,9 @@ import { JwtToken } from '@/jwt/jwt.dto';
 import { AccessTokenPayload, RefreshTokenPayload } from '@/jwt/jwt.type';
 import { PaginationDtoTx } from '@/common/pagination.dto';
 import { JwtAuthService } from '@/jwt/jwt.service';
-import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, Not } from 'typeorm';
 import { CommonRx } from '@/common/common.dto';
+import { State } from '@/common/state.type';
 
 @Injectable()
 export class UserService {
@@ -180,6 +181,55 @@ export class UserService {
         console.log(err); // 추후 수정
         throw new HttpException(
           '유저 수정에 실패했습니다',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  /**
+   * @author 김진태 <realbig4199@gmail.com>
+   * @description 유저를 삭제한다.
+   */
+  public async deleteUser(
+    user: AccessTokenPayload,
+    uuid: string,
+  ): Promise<CommonRx> {
+    try {
+      return await this.database.transaction(async (manager) => {
+        const userRepository = manager.getRepository(UserDao);
+        const loginRepository = manager.getRepository(LoginDao);
+
+        const user = await userRepository.findOne({
+          where: { uuid, state: Not(State.Deleted) },
+          relations: ['login'],
+        });
+
+        if (!user) {
+          throw new HttpException(
+            `${uuid}의 유저를 찾을 수 없습니다.`,
+            HttpStatus.NOT_FOUND,
+          );
+        }
+
+        await userRepository.update({ uuid }, { state: State.Deleted });
+        await loginRepository.update(
+          { id: user.login.id },
+          { state: State.Deleted },
+        );
+
+        return {
+          statusCode: HttpStatus.OK,
+          message: '유저가 삭제되었습니다.',
+        };
+      });
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        console.log(err); // 추후 수정
+        throw new HttpException(
+          '유저 삭제에 실패했습니다',
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
