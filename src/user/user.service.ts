@@ -1,7 +1,12 @@
 import { DatabaseService } from '@/database/database.service';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { LoginDao } from './dao/login.dao';
-import { GetUserDtoRx, GetUsersDtoRx, SignUpDtoTx } from './dto/user.dto';
+import {
+  GetUserDtoRx,
+  GetUsersDtoRx,
+  SignUpDtoTx,
+  UpdateUserDtoTx,
+} from './dto/user.dto';
 import * as brcypt from 'bcryptjs';
 import { UserDao } from '@/user/dao/user.dao';
 import { ConfigService } from '@/config/config.service';
@@ -11,6 +16,7 @@ import { AccessTokenPayload, RefreshTokenPayload } from '@/jwt/jwt.type';
 import { PaginationDtoTx } from '@/common/pagination.dto';
 import { JwtAuthService } from '@/jwt/jwt.service';
 import { LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { CommonRx } from '@/common/common.dto';
 
 @Injectable()
 export class UserService {
@@ -72,7 +78,7 @@ export class UserService {
   }
 
   /**
-   * @author 김진태 <realbig419@keyclops.com>
+   * @author 김진태 <realbig4199@gmail.com>
    * @description 유저를 상세조회한다.
    */
   public async getUser(
@@ -108,6 +114,72 @@ export class UserService {
         console.log(err); // 추후 수정
         throw new HttpException(
           '유저 조회에 실패했습니다',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  /**
+   * @author 김진태 <realbig4199@gmail.com>
+   * @description 유저를 수정한다.
+   */
+  public async updateUser(
+    user: AccessTokenPayload,
+    uuid: string,
+    dto: UpdateUserDtoTx,
+  ): Promise<CommonRx> {
+    try {
+      return await this.database.transaction(async (manager) => {
+        const userRepository = manager.getRepository(UserDao);
+        const loginRepository = manager.getRepository(LoginDao);
+
+        const user = await userRepository.findOne({
+          where: { uuid },
+          relations: ['login'],
+        });
+
+        if (!user) {
+          throw new HttpException(
+            `${uuid}의 유저를 찾을 수 없습니다.`,
+            HttpStatus.NOT_FOUND,
+          );
+        }
+
+        if (dto.name) {
+          await userRepository.update({ uuid }, { name: dto.name });
+        }
+
+        if (dto.passid) {
+          const login = await loginRepository.findOne({
+            where: { id: user.login.id },
+          });
+
+          if (!login) {
+            throw new HttpException(
+              `${uuid}의 로그인 정보를 찾을 수 없습니다.`,
+              HttpStatus.NOT_FOUND,
+            );
+          }
+
+          await loginRepository.update(
+            { id: login.id },
+            { passid: dto.passid },
+          );
+        }
+
+        return {
+          statusCode: HttpStatus.OK,
+          message: '유저가 수정되었습니다.',
+        };
+      });
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        console.log(err); // 추후 수정
+        throw new HttpException(
+          '유저 수정에 실패했습니다',
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
@@ -163,8 +235,6 @@ export class UserService {
           token.refreshToken,
           86400 * 1000,
         );
-
-        return token;
 
         return token;
       });

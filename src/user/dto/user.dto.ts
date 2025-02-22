@@ -1,4 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
+import {
+  ApiExtraModels,
+  ApiHideProperty,
+  ApiProperty,
+  OmitType,
+  PartialType,
+} from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import { IsArray, IsString, IsUUID, ValidateNested } from 'class-validator';
 
 export class SignUpDtoTx {
@@ -28,6 +35,10 @@ export class GetUserDtoRx {
   @IsString()
   public passid: string;
 }
+
+export class UpdateUserDtoTx extends PartialType(
+  OmitType(SignUpDtoTx, ['password']),
+) {}
 
 export class GetUsersDtoRx {
   @ApiProperty({
