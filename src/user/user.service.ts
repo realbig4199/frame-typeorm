@@ -15,7 +15,7 @@ import { JwtToken } from '@/jwt/jwt.dto';
 import { AccessTokenPayload, RefreshTokenPayload } from '@/jwt/jwt.type';
 import { PaginationDtoTx } from '@/common/pagination.dto';
 import { JwtAuthService } from '@/jwt/jwt.service';
-import { LessThanOrEqual, MoreThanOrEqual, Not } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThanOrEqual, Not } from 'typeorm';
 import { CommonRx } from '@/common/common.dto';
 import { State } from '@/common/state.type';
 
@@ -43,10 +43,10 @@ export class UserService {
         const { startDate, endDate, offset, limit, sortBy, order } = query;
 
         const users = await userRepository.find({
-          where: [
-            { createdAt: MoreThanOrEqual(new Date(startDate)) },
-            { createdAt: LessThanOrEqual(new Date(endDate)) },
-          ],
+          where: {
+            createdAt: Between(new Date(startDate), new Date(endDate)),
+            state: Not(State.Deleted),
+          },
           skip: offset,
           take: limit,
           order: {
@@ -91,7 +91,7 @@ export class UserService {
         const userRepository = manager.getRepository(UserDao);
 
         const user = await userRepository.findOne({
-          where: { uuid },
+          where: { uuid, state: Not(State.Deleted) },
           relations: ['login'],
         });
 
@@ -136,7 +136,7 @@ export class UserService {
         const loginRepository = manager.getRepository(LoginDao);
 
         const user = await userRepository.findOne({
-          where: { uuid },
+          where: { uuid, state: Not(State.Deleted) },
           relations: ['login'],
         });
 
