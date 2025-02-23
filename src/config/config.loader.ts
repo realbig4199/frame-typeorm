@@ -20,8 +20,9 @@ export const loadConfig = async (processEnv: any) => {
       algorithm: processEnv.JWT_ALGORITHM || '',
       issuer: processEnv.JWT_ISSUER || '',
       audience: processEnv.JWT_AUDIENCE || '',
-      secret: processEnv.JWT_SECRET || '',
+      accessSecret: processEnv.JWT_ACCESS_SECRET || '',
       accessExpire: parseInt(processEnv.JWT_ACCESS_EXPIRE) || 3600,
+      refreshSecret: processEnv.JWT_REFRESH_SECRET || '',
       refreshExpire: parseInt(processEnv.JWT_REFRESH_EXPIRE) || 86400,
     },
     redis: {

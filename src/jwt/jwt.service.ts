@@ -31,20 +31,21 @@ export class JwtAuthService {
     accessPayload: AccessTokenPayload,
     refreshPayload: RefreshTokenPayload,
   ): Promise<JwtToken> {
-    const secret = this.config.get('jwt.secret');
+    const accessSecret = this.config.get('jwt.accessSecret');
     const accessExpire = this.config.get('jwt.accessExpire');
+    const refreshSecret = this.config.get('jwt.refreshSecret');
     const refreshExpire = this.config.get('jwt.refreshExpire');
     const algorithm = this.config.get('jwt.algorithm');
 
     const accessToken = await this.jwt.signAsync(accessPayload, {
       algorithm,
-      secret,
+      secret: accessSecret,
       expiresIn: accessExpire,
     });
 
     const refreshToken = await this.jwt.signAsync(refreshPayload, {
       algorithm,
-      secret,
+      secret: refreshSecret,
       expiresIn: refreshExpire,
     });
 

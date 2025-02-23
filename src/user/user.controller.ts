@@ -11,7 +11,12 @@ import {
   Put,
   Delete,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UserService } from '@/user/user.service';
 import {
   GetUserDtoRx,
@@ -21,9 +26,10 @@ import {
   UpdateUserDtoTx,
 } from '@/user/dto/user.dto';
 import { JwtToken } from '@/jwt/jwt.dto';
-import { JwtGuard } from '@/jwt/jwt.guard';
+
 import { PaginationDtoTx } from '@/common/pagination.dto';
 import { CommonRx } from '@/common/common.dto';
+import { AccessTokenGuard } from '@/jwt/jwtAccess.guard';
 
 @Controller('user')
 @ApiTags('user')
@@ -34,7 +40,8 @@ export class UserController {
    * @author 김진태 <reabig4199@gmail.com>
    * @description 유저를 조회한다.
    */
-  @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
+  @ApiBearerAuth('Authorization')
   @Get('/')
   @ApiOperation({ summary: '유저를 조회한다.' })
   @ApiResponse({ status: HttpStatus.OK, type: GetUsersDtoRx })
@@ -50,7 +57,8 @@ export class UserController {
    * @author 김진태 <realbig4199@gmail.com>
    * @description 유저를 상세조회한다.
    */
-  // @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
+  @ApiBearerAuth()
   @Get('/:uuid')
   @ApiOperation({ summary: '유저를 상세조회한다.' })
   @ApiResponse({ status: HttpStatus.OK, type: GetUserDtoRx })
@@ -66,7 +74,8 @@ export class UserController {
    * @author 김진태 <realbig4199@gmail.com>
    * @description 유저를 수정한다.
    */
-  // @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
+  @ApiBearerAuth()
   @Put('/:uuid')
   @ApiOperation({ summary: '유저를 수정한다.' })
   @ApiResponse({ status: HttpStatus.OK, type: CommonRx })
@@ -86,7 +95,8 @@ export class UserController {
    * @author 김진태 <realbig4199@gmail.com>
    * @description 유저를 삭제한다.
    */
-  // @UseGuards(JwtGuard)
+  @UseGuards(AccessTokenGuard)
+  @ApiBearerAuth()
   @Delete('/:uuid')
   @ApiOperation({ summary: '유저를 삭제한다.' })
   @ApiResponse({ status: HttpStatus.OK, type: CommonRx })

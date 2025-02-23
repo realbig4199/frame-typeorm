@@ -5,8 +5,10 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtAuthService } from './jwt.service';
 
 import { ConfigService } from '@/config/config.service';
-import { JwtGuard } from '@/jwt/jwt.guard';
-import { JwtStrategy } from '@/jwt/jwt.stratgey';
+import { AccessTokenStrategy } from './jwtAccess.strategy';
+import { AccessTokenGuard } from './jwtAccess.guard';
+import { RefreshTokenStrategy } from './jwtRefresh.strategy';
+import { RefreshTokenGuard } from './jwtRefresh.guard';
 
 @Module({
   imports: [
@@ -16,7 +18,19 @@ import { JwtStrategy } from '@/jwt/jwt.stratgey';
       useFactory: (config: ConfigService) => ({}),
     }),
   ],
-  providers: [JwtStrategy, JwtGuard, JwtAuthService],
-  exports: [JwtStrategy, JwtGuard, JwtAuthService],
+  providers: [
+    AccessTokenStrategy,
+    AccessTokenGuard,
+    RefreshTokenStrategy,
+    RefreshTokenGuard,
+    JwtAuthService,
+  ],
+  exports: [
+    AccessTokenStrategy,
+    AccessTokenGuard,
+    RefreshTokenStrategy,
+    RefreshTokenGuard,
+    JwtAuthService,
+  ],
 })
 export class JwtModule {}
