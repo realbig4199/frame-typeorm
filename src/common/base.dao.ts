@@ -4,9 +4,7 @@ import {
   UpdateDateColumn,
   PrimaryGeneratedColumn,
   Column,
-  BeforeInsert,
 } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
 import { State } from '@/common/state.type';
 
 export abstract class BaseDao extends BaseEntity {

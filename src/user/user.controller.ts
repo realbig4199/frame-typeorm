@@ -11,17 +11,13 @@ import {
   Put,
   Delete,
 } from '@nestjs/common';
-import {
-  ApiExtraModels,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserService } from '@/user/user.service';
 import {
   GetUserDtoRx,
   GetUsersDtoRx,
-  SignUpDtoTx,
+  SigninDtoTx,
+  SignupDtoTx,
   UpdateUserDtoTx,
 } from '@/user/dto/user.dto';
 import { JwtToken } from '@/jwt/jwt.dto';
@@ -38,7 +34,7 @@ export class UserController {
    * @author 김진태 <reabig4199@gmail.com>
    * @description 유저를 조회한다.
    */
-  // @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard)
   @Get('/')
   @ApiOperation({ summary: '유저를 조회한다.' })
   @ApiResponse({ status: HttpStatus.OK, type: GetUsersDtoRx })
@@ -106,12 +102,27 @@ export class UserController {
    * @author 김진태 <realbig4199@gmail.com>
    * @description 유저를 생성한다. (회원가입)
    */
-  @Post('/signUp')
+  @Post('/signup')
   @ApiOperation({ summary: '유저를 생성한다. (회원가입)' })
   @ApiResponse({ status: HttpStatus.CREATED, type: JwtToken })
-  async signUp(@Body() dto: SignUpDtoTx): Promise<JwtToken> {
+  async signup(@Body() dto: SignupDtoTx): Promise<JwtToken> {
     try {
-      return await this.userService.signUp(dto);
+      return await this.userService.signup(dto);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  /**
+   * @author 김진태 <realbig4199@gmail.com>
+   * @description 로그인한다.
+   */
+  @Post('/signin')
+  @ApiOperation({ summary: '로그인한다.' })
+  @ApiResponse({ status: HttpStatus.OK, type: JwtToken })
+  async signin(@Body() dto: SigninDtoTx) {
+    try {
+      return await this.userService.signin(dto);
     } catch (err) {
       throw err;
     }

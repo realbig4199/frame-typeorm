@@ -4,7 +4,8 @@ import { LoginDao } from './dao/login.dao';
 import {
   GetUserDtoRx,
   GetUsersDtoRx,
-  SignUpDtoTx,
+  SigninDtoTx,
+  SignupDtoTx,
   UpdateUserDtoTx,
 } from './dto/user.dto';
 import * as brcypt from 'bcryptjs';
@@ -240,7 +241,7 @@ export class UserService {
    * @author 김진태 <realbig4199@gmail.com>
    * @description 유저를 생성한다. (회원가입)
    */
-  public async signUp(dto: SignUpDtoTx): Promise<JwtToken> {
+  public async signup(dto: SignupDtoTx): Promise<JwtToken> {
     try {
       return await this.database.transaction(async (manager) => {
         const loginRepository = manager.getRepository(LoginDao);
@@ -295,6 +296,80 @@ export class UserService {
         console.log(err); // 추후 수정
         throw new HttpException(
           '회원가입에 실패했습니다',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  /**
+   * @author 김진태 <realbig4199@gmail.com>
+   * @description 로그인한다.
+   */
+  public async signin(dto: SigninDtoTx): Promise<CommonRx | JwtToken> {
+    try {
+      return await this.database.transaction(async (manager) => {
+        const loginRepository = manager.getRepository(LoginDao);
+        const userRepository = manager.getRepository(UserDao);
+
+        const login = await loginRepository.findOne({
+          where: { passid: dto.passid, state: Not(State.Deleted) },
+          relations: ['user'],
+        });
+
+        if (!login) {
+          throw new HttpException(
+            `${dto.passid}의 유저를 찾을 수 없습니다.`,
+            HttpStatus.NOT_FOUND,
+          );
+        }
+
+        const isValid = await brcypt.compare(dto.password, login.password);
+
+        if (!isValid) {
+          throw new HttpException(
+            '비밀번호가 일치하지 않습니다.',
+            HttpStatus.UNAUTHORIZED,
+          );
+        }
+
+        const user = await userRepository.findOne({
+          where: { id: login.user.id, state: Not(State.Deleted) },
+        });
+
+        if (!user) {
+          throw new HttpException(
+            `${user.uuid}의 유저를 찾을 수 없습니다.`,
+            HttpStatus.NOT_FOUND,
+          );
+        }
+
+        const accessPayload: AccessTokenPayload =
+          await this.jwt.generatePayload(user.uuid);
+
+        const refreshPayload: RefreshTokenPayload =
+          await this.jwt.generatePayload(user.uuid);
+
+        const token = await this.jwt.generateToken(
+          accessPayload,
+          refreshPayload,
+        );
+
+        await this.cache.set(
+          user.id.toString(),
+          token.refreshToken,
+          86400 * 1000,
+        );
+
+        return token;
+      });
+    } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        console.log(err); // 추후 수정
+        throw new HttpException(
+          '로그인에 실패했습니다',
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
