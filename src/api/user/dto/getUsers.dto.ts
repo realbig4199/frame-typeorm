@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { GetUserDtoRx } from '@/user/dto/getUser.dto';
 import { IsArray, ValidateNested } from 'class-validator';
+import { GetUserDtoRx } from './getUser.dto';
 
 export class GetUsersDtoRx {
   @ApiProperty({

@@ -1,5 +1,4 @@
 import {
-  BaseEntity,
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn,
@@ -7,7 +6,7 @@ import {
 } from 'typeorm';
 import { State } from '@/common/state.type';
 
-export abstract class BaseDao extends BaseEntity {
+export abstract class BaseEntity {
   @PrimaryGeneratedColumn()
   public id: number;
 

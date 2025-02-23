@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { AccessTokenPayload, RefreshTokenPayload } from './jwt.type';
 
 import { ConfigService } from '@/config/config.service';
-import { JwtToken } from '@/jwt/jwt.dto';
+import { JwtToken } from './jwt.dto';
 
 @Injectable()
 export class JwtAuthService {

@@ -1,14 +1,11 @@
 import { DatabaseService } from '@/database/database.service';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { LoginDao } from './dao/login.dao';
 import * as brcypt from 'bcryptjs';
-import { UserDao } from '@/user/dao/user.dao';
 import { ConfigService } from '@/config/config.service';
 import { CacheService } from '@/cache/cache.service';
-import { JwtToken } from '@/jwt/jwt.dto';
-import { AccessTokenPayload, RefreshTokenPayload } from '@/jwt/jwt.type';
+import { JwtToken } from '@/api/jwt/jwt.dto';
+import { AccessTokenPayload, RefreshTokenPayload } from '@/api/jwt/jwt.type';
 import { PaginationDtoTx } from '@/common/pagination.dto';
-import { JwtAuthService } from '@/jwt/jwt.service';
 import { Between, LessThanOrEqual, MoreThanOrEqual, Not } from 'typeorm';
 import { CommonRx } from '@/common/common.dto';
 import { State } from '@/common/state.type';
@@ -17,6 +14,10 @@ import { GetUserDtoRx } from './dto/getUser.dto';
 import { UpdateUserDtoTx } from './dto/updateUser.dto';
 import { SignupDtoTx } from './dto/signup.dto';
 import { SigninDtoTx } from './dto/signin.dto';
+import { UserEntity } from '@/database/entity/user.entity';
+import { LoginEntity } from '@/database/entity/login.entity';
+import { JwtAuthService } from '../jwt/jwt.service';
+import { userRepository } from './user.repository';
 
 @Injectable()
 export class UserService {
@@ -37,7 +38,7 @@ export class UserService {
   ): Promise<GetUsersDtoRx> {
     try {
       return await this.database.transaction(async (manager) => {
-        const userRepository = manager.getRepository(UserDao);
+        const userRepository = manager.getRepository(UserEntity);
 
         const { startDate, endDate, offset, limit, sortBy, order } = query;
 
@@ -87,7 +88,7 @@ export class UserService {
   ): Promise<GetUserDtoRx> {
     try {
       return await this.database.transaction(async (manager) => {
-        const userRepository = manager.getRepository(UserDao);
+        const userRepository = manager.getRepository(UserEntity);
 
         const user = await userRepository.findOne({
           where: { uuid, state: Not(State.Deleted) },
@@ -131,8 +132,8 @@ export class UserService {
   ): Promise<CommonRx> {
     try {
       return await this.database.transaction(async (manager) => {
-        const userRepository = manager.getRepository(UserDao);
-        const loginRepository = manager.getRepository(LoginDao);
+        const userRepository = manager.getRepository(UserEntity);
+        const loginRepository = manager.getRepository(LoginEntity);
 
         const user = await userRepository.findOne({
           where: { uuid, state: Not(State.Deleted) },
@@ -196,8 +197,8 @@ export class UserService {
   ): Promise<CommonRx> {
     try {
       return await this.database.transaction(async (manager) => {
-        const userRepository = manager.getRepository(UserDao);
-        const loginRepository = manager.getRepository(LoginDao);
+        const userRepository = manager.getRepository(UserEntity);
+        const loginRepository = manager.getRepository(LoginEntity);
 
         const user = await userRepository.findOne({
           where: { uuid, state: Not(State.Deleted) },
@@ -242,8 +243,8 @@ export class UserService {
   public async signup(dto: SignupDtoTx): Promise<JwtToken> {
     try {
       return await this.database.transaction(async (manager) => {
-        const loginRepository = manager.getRepository(LoginDao);
-        const userRepository = manager.getRepository(UserDao);
+        const loginRepository = manager.getRepository(LoginEntity);
+        const userRepository = manager.getRepository(UserEntity);
 
         const existingUser = await loginRepository.findOne({
           where: { passid: dto.passid },
@@ -307,8 +308,8 @@ export class UserService {
   public async signin(dto: SigninDtoTx): Promise<CommonRx | JwtToken> {
     try {
       return await this.database.transaction(async (manager) => {
-        const loginRepository = manager.getRepository(LoginDao);
-        const userRepository = manager.getRepository(UserDao);
+        const loginRepository = manager.getRepository(LoginEntity);
+        const userRepository = manager.getRepository(UserEntity);
 
         const login = await loginRepository.findOne({
           where: { passid: dto.passid, state: Not(State.Deleted) },

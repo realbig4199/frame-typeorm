@@ -17,17 +17,17 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { UserService } from '@/user/user.service';
-import { JwtToken } from '@/jwt/jwt.dto';
+import { JwtToken } from '@/api/jwt/jwt.dto';
 
 import { PaginationDtoTx } from '@/common/pagination.dto';
 import { CommonRx } from '@/common/common.dto';
-import { AccessTokenGuard } from '@/jwt/jwtAccess.guard';
+import { AccessTokenGuard } from '@/api/jwt/jwtAccess.guard';
 import { GetUsersDtoRx } from './dto/getUsers.dto';
 import { GetUserDtoRx } from './dto/getUser.dto';
 import { UpdateUserDtoTx } from './dto/updateUser.dto';
 import { SignupDtoTx } from './dto/signup.dto';
 import { SigninDtoTx } from './dto/signin.dto';
+import { UserService } from './user.service';
 
 @Controller('user')
 @ApiTags('user')
