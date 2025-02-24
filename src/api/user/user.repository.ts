@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '@/database/entity/user.entity';
 import { CreateDtoTx } from './dto/create.dto';
+import { UpdateDtoTx } from './dto/update.dto';
 
 @Injectable()
 export class userRepository {
@@ -31,5 +32,15 @@ export class userRepository {
    * @author 김진태 <realbig4199@gmail.com>
    * @description 유저를 수정한다.
    */
-
+  public async update(uuid: string, dto: UpdateDtoTx) {
+    try {
+      return await this.userRepository.update(uuid, dto);
+    } catch (err) {
+      console.log(err); // 추후 수정
+      throw new HttpException(
+        '유저 수정에 실패했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
