@@ -46,6 +46,22 @@ export class userRepository {
 
   /**
    * @author 김진태 <realbig4199@gmail.com>
+   * @description 유저를 상세 조회한다.
+   */
+  public async get(uuid: string) {
+    try {
+      return await this.userRepository.findOneBy({ uuid });
+    } catch (err) {
+      console.log(err); // 추후 수정
+      throw new HttpException(
+        '유저 상세 조회에 실패했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  /**
+   * @author 김진태 <realbig4199@gmail.com>
    * @description 유저를 수정한다.
    */
   public async update(uuid: string, dto: UpdateDtoTx) {
