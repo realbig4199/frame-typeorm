@@ -25,22 +25,23 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
       },
     }),
   ],
-  providers: [
-    CacheService,
-    {
-      provide: CACHE_MANAGER,
-      useFactory: async (configService: ConfigService) => {
-        const redisConfig = configService.get('redis');
-        return await redisStore({
-          url: redisConfig.url,
-          username: redisConfig.options.username,
-          password: redisConfig.options.password,
-          ttl: redisConfig.options.ttl,
-        });
-      },
-      inject: [ConfigService],
-    },
-  ],
-  exports: [CacheService, CACHE_MANAGER],
+  // providers: [
+  //   CacheService,
+  //   {
+  //     provide: CACHE_MANAGER,
+  //     useFactory: async (configService: ConfigService) => {
+  //       const redisConfig = configService.get('redis');
+  //       return await redisStore({
+  //         url: redisConfig.url,
+  //         username: redisConfig.options.username,
+  //         password: redisConfig.options.password,
+  //         ttl: redisConfig.options.ttl,
+  //       });
+  //     },
+  //     inject: [ConfigService],
+  //   },
+  // ],
+  providers: [CacheService],
+  exports: [CacheService],
 })
 export class CacheModule {}

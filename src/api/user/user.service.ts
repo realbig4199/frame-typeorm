@@ -263,6 +263,7 @@ export class UserService {
           passid: dto.passid,
           password: hashedPassword,
         });
+        console.log(newLogin)
 
         const newUser = await userRepository.save({
           name: dto.name,

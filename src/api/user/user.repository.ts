@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '@/database/entity/user.entity';
-import { CreateUserDtoTx } from './dto/createUser.dto';
+import { CreateDtoTx } from './dto/create.dto';
 
 @Injectable()
 export class userRepository {
@@ -15,7 +15,7 @@ export class userRepository {
    * @author 김진태 <realbig4199@gmail.com>
    * @description 유저를 생성한다.
    */
-  public async createUser(dto: CreateUserDtoTx) {
+  public async create(dto: CreateDtoTx) {
     try {
       return await this.userRepository.save(dto);
     } catch (err) {
@@ -26,4 +26,10 @@ export class userRepository {
       );
     }
   }
+
+  /**
+   * @author 김진태 <realbig4199@gmail.com>
+   * @description 유저를 수정한다.
+   */
+
 }
