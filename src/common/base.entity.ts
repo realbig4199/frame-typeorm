@@ -3,6 +3,7 @@ import {
   UpdateDateColumn,
   PrimaryGeneratedColumn,
   Column,
+  DeleteDateColumn,
 } from 'typeorm';
 import { State } from '@/common/state.type';
 
@@ -21,4 +22,7 @@ export abstract class BaseEntity {
 
   @UpdateDateColumn()
   public updatedAt: Date;
+
+  @DeleteDateColumn({ nullable: true })
+  public deletedAt?: Date;
 }
