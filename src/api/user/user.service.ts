@@ -17,7 +17,6 @@ import { SigninDtoTx } from './dto/signin.dto';
 import { UserEntity } from '@/database/entity/user.entity';
 import { LoginEntity } from '@/database/entity/login.entity';
 import { JwtAuthService } from '../jwt/jwt.service';
-import { userRepository } from './user.repository';
 
 @Injectable()
 export class UserService {
