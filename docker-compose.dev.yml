@@ -30,22 +30,6 @@ services:
       - docker-network
     restart: always
 
-  recipot-nginx:
-    container_name: recipot-nginx
-    image: nginx:1.21.4-alpine
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - ./docker/nginx/conf.d:/etc/nginx/conf.d
-      - ./docker/nginx/logs:/var/log/nginx
-      - ./docker/nginx/ssl:/etc/nginx/ssl
-    depends_on:
-      - recipot-mariadb
-      - recipot-redis
-    networks:
-    - docker-network
-    restart: always
 networks:
   docker-network:
     external: true
