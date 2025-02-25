@@ -6,6 +6,7 @@ import { AppService } from '@/app.service';
 import { ConfigModule } from '@/config/config.module';
 import { CacheModule } from './cache/cache.module';
 import { UserModule } from './api/user/user.module';
+import { LoginModule } from './api/login/login.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UserModule } from './api/user/user.module';
     }),
     UserModule,
     CacheModule,
+    LoginModule,
   ],
   controllers: [AppController],
   providers: [AppService],
