@@ -11,7 +11,11 @@ export class UserRepository {
   ) {}
 
   public async create(userData: Partial<UserEntity>) {
-    return this.userRepository.save(userData);
+    try {
+      return this.userRepository.save(userData);
+    } catch (err) {
+      throw err;
+    }
   }
 
   public async findWithPagination(

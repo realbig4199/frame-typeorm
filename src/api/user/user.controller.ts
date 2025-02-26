@@ -56,7 +56,7 @@ export class UserController {
    * @description 유저를 상세조회한다.
    */
   @UseGuards(JwtGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('Authorization')
   @Get('/:uuid')
   @ApiOperation({ summary: '유저를 상세조회한다.' })
   @ApiResponse({ status: HttpStatus.OK, type: GetUserDtoRx })
@@ -73,7 +73,7 @@ export class UserController {
    * @description 유저를 수정한다.
    */
   @UseGuards(JwtGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('Authorization')
   @Put('/:uuid')
   @ApiOperation({ summary: '유저를 수정한다.' })
   @ApiResponse({ status: HttpStatus.OK, type: CommonRx })
@@ -94,7 +94,7 @@ export class UserController {
    * @description 유저를 삭제한다.
    */
   @UseGuards(JwtGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('Authorization')
   @Delete('/:uuid')
   @ApiOperation({ summary: '유저를 삭제한다.' })
   @ApiResponse({ status: HttpStatus.OK, type: CommonRx })

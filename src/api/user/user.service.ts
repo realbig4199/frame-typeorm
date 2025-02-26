@@ -89,12 +89,7 @@ export class UserService {
   ): Promise<GetUserDtoRx> {
     try {
       return await this.database.transaction(async (manager) => {
-        const userRepository = manager.getRepository(UserEntity);
-
-        const user = await userRepository.findOne({
-          where: { uuid, state: Not(State.Deleted) },
-          relations: ['login'],
-        });
+        const user = await this.userRepository.findByUuid(uuid);
 
         if (!user) {
           throw new HttpException(
