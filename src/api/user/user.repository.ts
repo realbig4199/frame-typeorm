@@ -19,6 +19,8 @@ export class UserRepository {
     limit: number = 10,
     startDate?: string,
     endDate?: string,
+    sortBy: string = 'createdAt',
+    order: 'asc' | 'desc' = 'desc',
   ) {
     const whereCondition: Record<string, any> = { deletedAt: null };
 
@@ -33,7 +35,7 @@ export class UserRepository {
       where: whereCondition,
       skip: offset,
       take: limit,
-      order: { createdAt: 'DESC' },
+      order: { [sortBy]: order },
       relations: ['login'],
     });
   }

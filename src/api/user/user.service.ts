@@ -45,22 +45,16 @@ export class UserService {
   ): Promise<GetUsersDtoRx> {
     try {
       return await this.database.transaction(async (manager) => {
-        const userRepository = manager.getRepository(UserEntity);
-
         const { startDate, endDate, offset, limit, sortBy, order } = query;
 
-        const users = await userRepository.find({
-          where: {
-            createdAt: Between(new Date(startDate), new Date(endDate)),
-            state: Not(State.Deleted),
-          },
-          skip: offset,
-          take: limit,
-          order: {
-            [sortBy]: order,
-          },
-          relations: ['login'],
-        });
+        const users = await this.userRepository.findWithPagination(
+          offset,
+          limit,
+          startDate,
+          endDate,
+          sortBy,
+          order,
+        );
 
         const userDtos = users.map((user) => ({
           userUuid: user.uuid,
