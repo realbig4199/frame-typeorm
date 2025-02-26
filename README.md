@@ -1,7 +1,5 @@
 # 레시팟
-
-# 프로젝트 구성 패키지 설치
-- npm install
+- 백엔드
 
 # 빠른 시작
 - npm install

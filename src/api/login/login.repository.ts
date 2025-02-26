@@ -11,14 +11,29 @@ export class LoginRepository {
   ) {}
 
   public async create(loginData: Partial<LoginEntity>) {
-    return this.loginRepository.save(loginData);
+    try {
+      return this.loginRepository.save(loginData);
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
 
   public async update(id: number, updateData: Partial<LoginEntity>) {
-    return this.loginRepository.update({ id }, updateData);
+    try {
+      return this.loginRepository.update({ id }, updateData);
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
 
   public async softDelete(id: number) {
-    return this.loginRepository.softDelete({ id });
+    try {
+      return this.loginRepository.softDelete({ id });
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
 }

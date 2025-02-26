@@ -14,6 +14,7 @@ export class UserRepository {
     try {
       return this.userRepository.save(userData);
     } catch (err) {
+      console.log(err);
       throw err;
     }
   }
@@ -26,36 +27,56 @@ export class UserRepository {
     sortBy: string = 'createdAt',
     order: 'asc' | 'desc' = 'desc',
   ) {
-    const whereCondition: Record<string, any> = { deletedAt: null };
+    try {
+      const whereCondition: Record<string, any> = { deletedAt: null };
 
-    if (startDate && endDate) {
-      whereCondition.createdAt = Between(
-        new Date(startDate),
-        new Date(endDate),
-      );
+      if (startDate && endDate) {
+        whereCondition.createdAt = Between(
+          new Date(startDate),
+          new Date(endDate),
+        );
+      }
+
+      return this.userRepository.find({
+        where: whereCondition,
+        skip: offset,
+        take: limit,
+        order: { [sortBy]: order },
+        relations: ['login'],
+      });
+    } catch (err) {
+      console.log(err);
+      throw err;
     }
-
-    return this.userRepository.find({
-      where: whereCondition,
-      skip: offset,
-      take: limit,
-      order: { [sortBy]: order },
-      relations: ['login'],
-    });
   }
 
   public async findByUuid(uuid: string) {
-    return this.userRepository.findOne({
-      where: { uuid, deletedAt: null },
-      relations: ['login'],
-    });
+    try {
+      return this.userRepository.findOne({
+        where: { uuid, deletedAt: null },
+        relations: ['login'],
+      });
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
 
   public async update(uuid: string, updateData: Partial<UserEntity>) {
-    return this.userRepository.update({ uuid }, updateData);
+    try {
+      return this.userRepository.update({ uuid }, updateData);
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
 
   public async softDelete(uuid: string) {
-    return this.userRepository.softDelete({ uuid });
+    try {
+      return this.userRepository.softDelete({ uuid });
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
 }
