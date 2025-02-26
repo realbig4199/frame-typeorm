@@ -4,7 +4,11 @@ import * as brcypt from 'bcryptjs';
 import { ConfigService } from '@/config/config.service';
 import { CacheService } from '@/cache/cache.service';
 import { JwtToken } from '@/api/jwt/jwt.dto';
-import { AccessTokenPayload, RefreshTokenPayload } from '@/api/jwt/jwt.type';
+import {
+  AccessTokenPayload,
+  RefreshTokenPayload,
+  TokenType,
+} from '@/api/jwt/jwt.type';
 import { PaginationDtoTx } from '@/common/pagination.dto';
 import { Between, LessThanOrEqual, MoreThanOrEqual, Not } from 'typeorm';
 import { CommonRx } from '@/common/common.dto';
@@ -273,10 +277,10 @@ export class UserService {
         });
 
         const accessPayload: AccessTokenPayload =
-          await this.jwt.generatePayload(newUser.uuid);
+          await this.jwt.generatePayload(newUser.uuid, TokenType.Access);
 
         const refreshPayload: RefreshTokenPayload =
-          await this.jwt.generatePayload(newUser.uuid);
+          await this.jwt.generatePayload(newUser.uuid, TokenType.Refresh);
 
         const token = await this.jwt.generateToken(
           accessPayload,
@@ -347,10 +351,10 @@ export class UserService {
         }
 
         const accessPayload: AccessTokenPayload =
-          await this.jwt.generatePayload(user.uuid);
+          await this.jwt.generatePayload(user.uuid, TokenType.Access);
 
         const refreshPayload: RefreshTokenPayload =
-          await this.jwt.generatePayload(user.uuid);
+          await this.jwt.generatePayload(user.uuid, TokenType.Refresh);
 
         const token = await this.jwt.generateToken(
           accessPayload,

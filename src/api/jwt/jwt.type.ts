@@ -4,10 +4,8 @@ export class TokenPayloadBase {
   public iss: string;
   public sub: string;
   public aud: string;
-  // public exp: number;
-  // public nbf: number;
-  // public iat: number;
   public jti: string;
+  public typ: string;
 }
 
 export class AccessTokenPayload extends TokenPayloadBase {
@@ -21,3 +19,9 @@ export class RefreshTokenPayload extends TokenPayloadBase {
 export interface RequestWithUser extends Request {
   user: AccessTokenPayload;
 }
+
+export const TokenType = {
+  Access: 'access',
+  Refresh: 'refresh',
+} as const;
+export type TokenType = (typeof TokenType)[keyof typeof TokenType];

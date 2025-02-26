@@ -21,7 +21,7 @@ import { JwtToken } from '@/api/jwt/jwt.dto';
 
 import { PaginationDtoTx } from '@/common/pagination.dto';
 import { CommonRx } from '@/common/common.dto';
-import { AccessTokenGuard } from '@/api/jwt/jwtAccess.guard';
+import { JwtGuard } from '@/api/jwt/jwt.guard';
 import { GetUsersDtoRx } from './dto/getUsers.dto';
 import { GetUserDtoRx } from './dto/getUser.dto';
 import { UpdateUserDtoTx } from './dto/updateUser.dto';
@@ -38,7 +38,7 @@ export class UserController {
    * @author 김진태 <reabig4199@gmail.com>
    * @description 유저를 조회한다.
    */
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(JwtGuard)
   @ApiBearerAuth('Authorization')
   @Get('/')
   @ApiOperation({ summary: '유저를 조회한다.' })
@@ -55,7 +55,7 @@ export class UserController {
    * @author 김진태 <realbig4199@gmail.com>
    * @description 유저를 상세조회한다.
    */
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(JwtGuard)
   @ApiBearerAuth()
   @Get('/:uuid')
   @ApiOperation({ summary: '유저를 상세조회한다.' })
@@ -72,7 +72,7 @@ export class UserController {
    * @author 김진태 <realbig4199@gmail.com>
    * @description 유저를 수정한다.
    */
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(JwtGuard)
   @ApiBearerAuth()
   @Put('/:uuid')
   @ApiOperation({ summary: '유저를 수정한다.' })
@@ -93,7 +93,7 @@ export class UserController {
    * @author 김진태 <realbig4199@gmail.com>
    * @description 유저를 삭제한다.
    */
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(JwtGuard)
   @ApiBearerAuth()
   @Delete('/:uuid')
   @ApiOperation({ summary: '유저를 삭제한다.' })

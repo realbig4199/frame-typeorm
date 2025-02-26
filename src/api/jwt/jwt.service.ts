@@ -63,6 +63,7 @@ export class JwtAuthService {
    */
   public async generatePayload(
     userUuid: string,
+    typ: string,
   ): Promise<AccessTokenPayload | RefreshTokenPayload> {
     return {
       sub: userUuid,
@@ -70,6 +71,7 @@ export class JwtAuthService {
       iss: this.config.get('jwt.issuer'),
       jti: uuidv4(),
       userUuid,
+      typ,
     };
   }
 }
