@@ -1,7 +1,7 @@
 import { LoginEntity } from '@/database/entity/login.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 
 @Injectable()
 export class LoginRepository {
@@ -10,27 +10,46 @@ export class LoginRepository {
     private readonly loginRepository: Repository<LoginEntity>,
   ) {}
 
-  public async create(loginData: Partial<LoginEntity>) {
+  public async create(
+    loginData: Partial<LoginEntity>,
+    manager?: EntityManager,
+  ) {
     try {
-      return this.loginRepository.save(loginData);
+      const repository = manager
+        ? manager.getRepository(LoginEntity)
+        : this.loginRepository;
+
+      return await repository.save(loginData);
     } catch (err) {
       console.log(err);
       throw err;
     }
   }
 
-  public async update(id: number, updateData: Partial<LoginEntity>) {
+  public async update(
+    id: number,
+    updateData: Partial<LoginEntity>,
+    manager?: EntityManager,
+  ) {
     try {
-      return this.loginRepository.update({ id }, updateData);
+      const repository = manager
+        ? manager.getRepository(LoginEntity)
+        : this.loginRepository;
+
+      return await repository.update({ id }, updateData);
     } catch (err) {
       console.log(err);
       throw err;
     }
   }
 
-  public async softDelete(id: number) {
+  public async softDelete(id: number, manager?: EntityManager) {
     try {
-      return this.loginRepository.softDelete({ id });
+      const repository = manager
+        ? manager.getRepository(LoginEntity)
+        : this.loginRepository;
+
+      return await repository.softDelete({ id });
     } catch (err) {
       console.log(err);
       throw err;

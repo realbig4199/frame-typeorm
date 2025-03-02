@@ -128,41 +128,33 @@ export class UserService {
   ): Promise<CommonRx> {
     try {
       return await this.database.transaction(async (manager) => {
-        const userRepository = manager.getRepository(UserEntity);
-        const loginRepository = manager.getRepository(LoginEntity);
+        const currentUser = await this.userRepository.findByUuid(user.userUuid);
 
-        const user = await userRepository.findOne({
-          where: { uuid, state: Not(State.Deleted) },
-          relations: ['login'],
-        });
+        if (!currentUser) {
+          throw new HttpException(
+            `${user.userUuid}의 유저를 찾을 수 없습니다.`,
+            HttpStatus.NOT_FOUND,
+          );
+        }
 
-        if (!user) {
+        const userToUpdate = await this.userRepository.findByUuid(uuid);
+
+        if (!userToUpdate) {
           throw new HttpException(
             `${uuid}의 유저를 찾을 수 없습니다.`,
             HttpStatus.NOT_FOUND,
           );
         }
 
-        if (dto.name) {
-          await userRepository.update({ uuid }, { name: dto.name });
+        if (currentUser.uuid !== userToUpdate.uuid) {
+          throw new HttpException(
+            '수정 권한이 없습니다.',
+            HttpStatus.UNAUTHORIZED,
+          );
         }
 
-        if (dto.passid) {
-          const login = await loginRepository.findOne({
-            where: { id: user.login.id },
-          });
-
-          if (!login) {
-            throw new HttpException(
-              `${uuid}의 로그인 정보를 찾을 수 없습니다.`,
-              HttpStatus.NOT_FOUND,
-            );
-          }
-
-          await loginRepository.update(
-            { id: login.id },
-            { passid: dto.passid },
-          );
+        if (dto.name) {
+          await this.userRepository.update(uuid, { name: dto.name });
         }
 
         return {
