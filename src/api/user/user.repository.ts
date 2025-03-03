@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Between, Repository } from 'typeorm';
+import { Between, EntityManager, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '@/database/entity/user.entity';
 
@@ -10,9 +10,13 @@ export class UserRepository {
     private readonly userRepository: Repository<UserEntity>,
   ) {}
 
-  public async create(userData: Partial<UserEntity>) {
+  public async create(userData: Partial<UserEntity>, manager?: EntityManager) {
     try {
-      return this.userRepository.save(userData);
+      const repository = manager
+        ? manager.getRepository(UserEntity)
+        : this.userRepository;
+
+      return await repository.save(userData);
     } catch (err) {
       console.log(err);
       throw err;
@@ -26,8 +30,12 @@ export class UserRepository {
     endDate?: string,
     sortBy: string = 'createdAt',
     order: 'asc' | 'desc' = 'desc',
+    manager?: EntityManager,
   ) {
     try {
+      const repository = manager
+        ? manager.getRepository(UserEntity)
+        : this.userRepository;
       const whereCondition: Record<string, any> = { deletedAt: null };
 
       if (startDate && endDate) {
@@ -37,7 +45,7 @@ export class UserRepository {
         );
       }
 
-      return this.userRepository.find({
+      return await repository.find({
         where: whereCondition,
         skip: offset,
         take: limit,
@@ -50,9 +58,13 @@ export class UserRepository {
     }
   }
 
-  public async findByUuid(uuid: string) {
+  public async findByUuid(uuid: string, manager?: EntityManager) {
     try {
-      return this.userRepository.findOne({
+      const repository = manager
+        ? manager.getRepository(UserEntity)
+        : this.userRepository;
+
+      return await repository.findOne({
         where: { uuid, deletedAt: null },
         relations: ['login'],
       });
@@ -62,18 +74,30 @@ export class UserRepository {
     }
   }
 
-  public async update(uuid: string, updateData: Partial<UserEntity>) {
+  public async update(
+    uuid: string,
+    updateData: Partial<UserEntity>,
+    manager?: EntityManager,
+  ) {
     try {
-      return this.userRepository.update({ uuid }, updateData);
+      const repository = manager
+        ? manager.getRepository(UserEntity)
+        : this.userRepository;
+
+      return await repository.update({ uuid }, updateData);
     } catch (err) {
       console.log(err);
       throw err;
     }
   }
 
-  public async softDelete(uuid: string) {
+  public async softDelete(uuid: string, manager?: EntityManager) {
     try {
-      return this.userRepository.softDelete({ uuid });
+      const repository = manager
+        ? manager.getRepository(UserEntity)
+        : this.userRepository;
+
+      return await repository.softDelete({ uuid });
     } catch (err) {
       console.log(err);
       throw err;
