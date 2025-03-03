@@ -26,6 +26,22 @@ export class LoginRepository {
     }
   }
 
+  public async findByPassid(passid: string, manager?: EntityManager) {
+    try {
+      const repository = manager
+        ? manager.getRepository(LoginEntity)
+        : this.loginRepository;
+
+      return await repository.findOne({
+        where: { passid, deletedAt: null },
+        relations: ['user'],
+      });
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
   public async update(
     id: number,
     updateData: Partial<LoginEntity>,

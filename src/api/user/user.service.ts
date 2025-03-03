@@ -54,6 +54,7 @@ export class UserService {
           endDate,
           sortBy,
           order,
+          manager,
         );
 
         const userDtos = users.map((user) => ({
@@ -89,7 +90,7 @@ export class UserService {
   ): Promise<GetUserDtoRx> {
     try {
       return await this.database.transaction(async (manager) => {
-        const user = await this.userRepository.findByUuid(uuid);
+        const user = await this.userRepository.findByUuid(uuid, manager);
 
         if (!user) {
           throw new HttpException(
@@ -128,7 +129,10 @@ export class UserService {
   ): Promise<CommonRx> {
     try {
       return await this.database.transaction(async (manager) => {
-        const currentUser = await this.userRepository.findByUuid(user.userUuid);
+        const currentUser = await this.userRepository.findByUuid(
+          user.userUuid,
+          manager,
+        );
 
         if (!currentUser) {
           throw new HttpException(
@@ -137,7 +141,10 @@ export class UserService {
           );
         }
 
-        const userToUpdate = await this.userRepository.findByUuid(uuid);
+        const userToUpdate = await this.userRepository.findByUuid(
+          uuid,
+          manager,
+        );
 
         if (!userToUpdate) {
           throw new HttpException(
@@ -154,7 +161,7 @@ export class UserService {
         }
 
         if (dto.name) {
-          await this.userRepository.update(uuid, { name: dto.name });
+          await this.userRepository.update(uuid, { name: dto.name }, manager);
         }
 
         return {
@@ -185,13 +192,7 @@ export class UserService {
   ): Promise<CommonRx> {
     try {
       return await this.database.transaction(async (manager) => {
-        const userRepository = manager.getRepository(UserEntity);
-        const loginRepository = manager.getRepository(LoginEntity);
-
-        const user = await userRepository.findOne({
-          where: { uuid, state: Not(State.Deleted) },
-          relations: ['login'],
-        });
+        const user = await this.userRepository.findByUuid(uuid, manager);
 
         if (!user) {
           throw new HttpException(
@@ -200,11 +201,9 @@ export class UserService {
           );
         }
 
-        await userRepository.update({ uuid }, { state: State.Deleted });
-        await loginRepository.update(
-          { id: user.login.id },
-          { state: State.Deleted },
-        );
+        await this.userRepository.softDelete(uuid, manager);
+
+        await this.loginRepository.softDelete(user.login.id, manager);
 
         return {
           statusCode: HttpStatus.OK,
@@ -231,12 +230,10 @@ export class UserService {
   public async signup(dto: SignupDtoTx): Promise<JwtToken> {
     try {
       return await this.database.transaction(async (manager) => {
-        const loginRepository = manager.getRepository(LoginEntity);
-        const userRepository = manager.getRepository(UserEntity);
-
-        const existingUser = await loginRepository.findOne({
-          where: { passid: dto.passid },
-        });
+        const existingUser = await this.loginRepository.findByPassid(
+          dto.passid,
+          manager,
+        );
 
         if (existingUser) {
           throw new HttpException(
@@ -247,15 +244,21 @@ export class UserService {
 
         const hashedPassword = await brcypt.hash(dto.password, 10);
 
-        const newLogin = await loginRepository.save({
-          passid: dto.passid,
-          password: hashedPassword,
-        });
+        const newLogin = await this.loginRepository.create(
+          {
+            passid: dto.passid,
+            password: hashedPassword,
+          },
+          manager,
+        );
 
-        const newUser = await userRepository.save({
-          name: dto.name,
-          login: newLogin,
-        });
+        const newUser = await this.userRepository.create(
+          {
+            name: dto.name,
+            login: newLogin,
+          },
+          manager,
+        );
 
         const accessPayload: AccessTokenPayload =
           await this.jwt.generatePayload(newUser.uuid, TokenType.Access);
@@ -296,13 +299,10 @@ export class UserService {
   public async signin(dto: SigninDtoTx): Promise<CommonRx | JwtToken> {
     try {
       return await this.database.transaction(async (manager) => {
-        const loginRepository = manager.getRepository(LoginEntity);
-        const userRepository = manager.getRepository(UserEntity);
-
-        const login = await loginRepository.findOne({
-          where: { passid: dto.passid, state: Not(State.Deleted) },
-          relations: ['user'],
-        });
+        const login = await this.loginRepository.findByPassid(
+          dto.passid,
+          manager,
+        );
 
         if (!login) {
           throw new HttpException(
@@ -320,9 +320,10 @@ export class UserService {
           );
         }
 
-        const user = await userRepository.findOne({
-          where: { id: login.user.id, state: Not(State.Deleted) },
-        });
+        const user = await this.userRepository.findByUuid(
+          login.user.uuid,
+          manager,
+        );
 
         if (!user) {
           throw new HttpException(
