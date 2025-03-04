@@ -10,16 +10,12 @@ import {
   TokenType,
 } from '@/api/jwt/jwt.type';
 import { PaginationDtoTx } from '@/common/pagination.dto';
-import { Between, LessThanOrEqual, MoreThanOrEqual, Not } from 'typeorm';
 import { CommonRx } from '@/common/common.dto';
-import { State } from '@/common/state.type';
 import { GetUsersDtoRx } from './dto/getUsers.dto';
 import { GetUserDtoRx } from './dto/getUser.dto';
 import { UpdateUserDtoTx } from './dto/updateUser.dto';
 import { SignupDtoTx } from './dto/signup.dto';
 import { SigninDtoTx } from './dto/signin.dto';
-import { UserEntity } from '@/database/entity/user.entity';
-import { LoginEntity } from '@/database/entity/login.entity';
 import { JwtAuthService } from '../jwt/jwt.service';
 import { LoginRepository } from '../login/login.repository';
 import { UserRepository } from './user.repository';
