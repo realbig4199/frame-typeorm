@@ -8,17 +8,19 @@ const migrationsDir = path.join(__dirname, 'migrations');
 const filePath = path.join(migrationsDir, `${formattedDate}-migration.ts`);
 
 const template = `
-const { MigrationInterface, QueryRunner, Table } = require('typeorm');
+(() => {
+  const { MigrationInterface, QueryRunner, Table, TableColumn } = require('typeorm');
 
-module.exports = class Migration${formattedDate} {
-  async up(queryRunner) {
-    // TODO: Write migration logic here
-  }
+  module.exports = class Migration${formattedDate} {
+    async up(queryRunner) {
+      // TODO: Write migration logic here
+    }
 
-  async down(queryRunner) {
-    // TODO: Write rollback logic here
-  }
-};
+    async down(queryRunner) {
+      // TODO: Write rollback logic here
+    }
+  };
+})();
 `;
 
 fs.mkdirSync(migrationsDir, { recursive: true });
