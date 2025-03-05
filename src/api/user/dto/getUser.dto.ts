@@ -6,9 +6,9 @@ export class GetUserDtoRx {
   @IsUUID()
   public userUuid: string;
 
-  @ApiProperty({ example: '이름' })
-  @IsString()
-  public name: string;
+  // @ApiProperty({ example: '이름' })
+  // @IsString()
+  // public name: string;
 
   @ApiProperty({ example: '아이디' })
   @IsString()

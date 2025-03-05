@@ -55,7 +55,7 @@ export class UserService {
 
         const userDtos = users.map((user) => ({
           userUuid: user.uuid,
-          name: user.name,
+          // name: user.name,
           passid: user.login.passid,
         }));
 
@@ -97,7 +97,7 @@ export class UserService {
 
         return {
           userUuid: user.uuid,
-          name: user.name,
+          // name: user.name,
           passid: user.login.passid,
         };
       });
@@ -156,9 +156,10 @@ export class UserService {
           );
         }
 
-        if (dto.name) {
-          await this.userRepository.update(uuid, { name: dto.name }, manager);
-        }
+        // 엔터티 구조 변경에 따른 수정
+        // if (dto.name) {
+        //   await this.userRepository.update(uuid, { name: dto.name }, manager);
+        // }
 
         return {
           statusCode: HttpStatus.OK,
@@ -250,7 +251,7 @@ export class UserService {
 
         const newUser = await this.userRepository.create(
           {
-            name: dto.name,
+            // name: dto.name, // 엔터티 구조 변경에 따른 수정
             login: newLogin,
           },
           manager,

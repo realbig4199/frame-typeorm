@@ -4,10 +4,14 @@ import { LoginEntity } from './login.entity';
 
 @Entity({ name: 'users' })
 export class UserEntity extends BaseEntity {
-  @Column()
-  name: string;
+  @Column({ type: 'varchar', default: 'Unknown' })
+  gender: string;
 
-  // 추후 핸드폰 번호, 등등 추가
+  @Column({ type: 'varchar', unique: true, nullable: true })
+  phone: string;
+
+  @Column({ type: 'varchar', unique: true, nullable: true })
+  email: string;
 
   @OneToOne(() => LoginEntity, (login) => login.user)
   @JoinColumn({ name: 'login_id' })
