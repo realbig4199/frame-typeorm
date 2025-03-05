@@ -101,6 +101,9 @@ export class UserService {
         return {
           userUuid: user.uuid,
           // name: user.name,
+          gender: user.gender,
+          phone: user.phone,
+          email: user.email,
           passid: user.login.passid,
         };
       });
