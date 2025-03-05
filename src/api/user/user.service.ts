@@ -252,6 +252,9 @@ export class UserService {
         const newUser = await this.userRepository.create(
           {
             // name: dto.name, // 엔터티 구조 변경에 따른 수정
+            gender: dto.gender,
+            phone: dto.phone,
+            email: dto.email,
             login: newLogin,
           },
           manager,

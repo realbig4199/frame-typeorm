@@ -10,7 +10,19 @@ export class SignupDtoTx {
   @IsString()
   public password: string;
 
-  @ApiProperty({ example: '이름' })
+  // @ApiProperty({ example: '이름' })
+  // @IsString()
+  // public name: string;
+
+  @ApiProperty({ example: '성별' })
   @IsString()
-  public name: string;
+  public gender: string;
+
+  @ApiProperty({ example: '전화번호' })
+  @IsString()
+  public phone: string;
+
+  @ApiProperty({ example: '이메일' })
+  @IsString()
+  public email: string;
 }
