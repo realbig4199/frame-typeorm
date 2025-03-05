@@ -55,7 +55,10 @@ export class UserService {
 
         const userDtos = users.map((user) => ({
           userUuid: user.uuid,
-          // name: user.name,
+          // name: user.name, // 엔터티 구조 변경에 따른 수정
+          gender: user.gender,
+          phone: user.phone,
+          email: user.email,
           passid: user.login.passid,
         }));
 
