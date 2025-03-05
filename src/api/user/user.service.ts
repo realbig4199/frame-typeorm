@@ -167,6 +167,15 @@ export class UserService {
         //   await this.userRepository.update(uuid, { name: dto.name }, manager);
         // }
 
+        const { passid, ...updateData } = dto;
+
+        await this.loginRepository.update(
+          userToUpdate.login.id,
+          { passid },
+          manager,
+        );
+        await this.userRepository.update(uuid, updateData, manager);
+
         return {
           statusCode: HttpStatus.OK,
           message: '유저가 수정되었습니다.',
