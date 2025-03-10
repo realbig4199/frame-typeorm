@@ -7,6 +7,7 @@ import { ConfigModule } from '@/config/config.module';
 import { CacheModule } from './cache/cache.module';
 import { UserModule } from './api/user/user.module';
 import { LoginModule } from './api/login/login.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { LoginModule } from './api/login/login.module';
         ? join(__dirname, '../.env')
         : undefined,
     }),
+    DatabaseModule,
     UserModule,
     CacheModule,
     LoginModule,
