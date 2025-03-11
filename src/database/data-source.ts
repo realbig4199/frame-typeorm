@@ -3,8 +3,9 @@ import { ConfigService } from '@/config/config.service';
 import { UserEntity } from './entity/user.entity';
 import { LoginEntity } from './entity/login.entity';
 import { loadConfig } from '@/config/config.loader';
+import { BoardEntity } from '@/database/entity/board.entity';
 
-async function createDataSource() {
+async function createDataSource(): Promise<DataSource> {
   const configData = await loadConfig(process.env);
   const configService = new ConfigService(configData);
 
@@ -15,13 +16,13 @@ async function createDataSource() {
     username: configService.get<string>('database.username') || 'recipot',
     password: configService.get<string>('database.password') || 'recipot1!11',
     database: configService.get<string>('database.database') || 'recipot',
-    entities: [UserEntity, LoginEntity],
-    migrations: ['src/database/migrations/*.ts'],
+    entities: [UserEntity, LoginEntity, BoardEntity],
+    migrations: [__dirname + '/migrations/*.js'], // `dist/` 경로 문제 해결
     synchronize: false,
     migrationsTableName: 'migrations_history',
   });
 }
 
-const dataSource = createDataSource();
+const dataSourcePromise = createDataSource();
 
-export default dataSource;
+export default dataSourcePromise;

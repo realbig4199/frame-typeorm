@@ -1,4 +1,4 @@
-const { MigrationInterface, QueryRunner, Table } = require('typeorm');
+import { Table } from 'typeorm';
 
 module.exports = class Migration20250304115256 {
   async up(queryRunner) {

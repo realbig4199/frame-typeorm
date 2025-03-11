@@ -4,11 +4,11 @@ import { JwtModule } from '@/api/jwt/jwt.module';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { LoginRepository } from '../login/login.repository';
-import { UserRepository } from './user.repository';
+import { UserCustomRepository } from './user-custom.repository';
 
 @Module({
   imports: [DatabaseModule, JwtModule],
   controllers: [UserController],
-  providers: [UserService, LoginRepository, UserRepository],
+  providers: [UserService, LoginRepository, UserCustomRepository],
 })
 export class UserModule {}
