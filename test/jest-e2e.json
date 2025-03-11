@@ -8,10 +8,11 @@
   "testEnvironment": "node",
   "globalSetup": "<rootDir>/test/e2e/setup.ts",
   "moduleNameMapper": {
-    "^@/(.*)$": "/Users/kimjintae/frame/src/$1"
+    "^@/(.*)$": "<rootDir>/src/$1"
   },
   "setupFiles": ["dotenv/config"],
   "forceExit": true,
+  "detectOpenHandles": true,
   "moduleDirectories": [
     "node_modules",
     "src"

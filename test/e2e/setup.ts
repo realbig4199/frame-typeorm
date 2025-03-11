@@ -10,7 +10,7 @@ export default async () => {
 
   const app: INestApplication = moduleFixture.createNestApplication();
 
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.useGlobalPipes(new ValidationPipe());
 
   await app.close();
 };
