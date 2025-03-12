@@ -14,7 +14,8 @@ import {
 import {
   ApiBearerAuth,
   ApiOkResponse,
-  ApiOperation, ApiQuery,
+  ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
   getSchemaPath,
