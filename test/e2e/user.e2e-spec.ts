@@ -5,12 +5,14 @@ import { AppModule } from '@/app.module';
 import { JwtAuthService } from '@/api/jwt/jwt.service';
 import { TokenType } from '@/api/jwt/jwt.type';
 import { DataSource } from 'typeorm';
+import { UserEntity } from '@/database/entity/user.entity';
+import { LoginEntity } from '@/database/entity/login.entity';
 
 describe('UserController (E2E)', () => {
   let app: INestApplication;
   let jwtService: JwtAuthService;
   let accessToken: string;
-  let testUserUuid: string = '5706df93-f3eb-11ef-bed5-0242ac140003';
+  const testUserUuid: string = '5706df93-f3eb-11ef-bed5-0242ac140003';
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -67,21 +69,59 @@ describe('UserController (E2E)', () => {
     }
   });
 
-  if (!process.env.TEST_TARGET || process.env.TEST_TARGET === 'getUser') {
-    it('/user/:uuid (GET) - 유저를 상세조회한다.', async () => {
-      const response = await request(app.getHttpServer())
-        .get(`/user/${testUserUuid}`)
-        .set('Authorization', `Bearer ${accessToken}`)
-        .expect(HttpStatus.OK);
+  it('/user/:uuid (GET) - 유저를 상세조회한다.', async () => {
+    const response = await request(app.getHttpServer())
+      .get(`/user/${testUserUuid}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(HttpStatus.OK);
 
-      console.log('Response Status:', response.status);
-      console.log('Response Body:', response.body);
+    expect(response.body).toHaveProperty('userUuid', testUserUuid);
+    expect(response.body).toHaveProperty('gender');
+    expect(response.body).toHaveProperty('phone');
+    expect(response.body).toHaveProperty('email');
+    expect(response.body).toHaveProperty('passid');
+  });
 
-      expect(response.body).toHaveProperty('userUuid', testUserUuid);
-      expect(response.body).toHaveProperty('gender');
-      expect(response.body).toHaveProperty('phone');
-      expect(response.body).toHaveProperty('email');
-      expect(response.body).toHaveProperty('passid');
+  it('/user/:uuid (DELETE) - 유저를 삭제한다.', async () => {
+    const response = await request(app.getHttpServer())
+      .delete(`/user/${testUserUuid}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(HttpStatus.OK);
+
+    expect(response.body).toEqual({
+      statusCode: HttpStatus.OK,
+      message: '유저가 삭제되었습니다.',
     });
-  }
+
+    console.log(`🗑 유저 ${testUserUuid} 삭제 완료`);
+
+    // 🔄 삭제된 유저 복원
+    const dataSource = app.get(DataSource);
+    if (dataSource && dataSource.isInitialized) {
+      const userRepository = dataSource.getRepository(UserEntity);
+      const loginRepository = dataSource.getRepository(LoginEntity);
+
+      const deletedUser = await userRepository.findOne({
+        where: { uuid: testUserUuid },
+        relations: ['login'],
+        withDeleted: true, // soft delete 된 데이터 포함 조회
+      });
+
+      if (deletedUser) {
+        await userRepository.recover(deletedUser);
+        console.log(`🔄 유저 ${deletedUser.uuid} 복원 완료`);
+      }
+
+      // 로그인 정보 복원
+      const deletedLogin = await loginRepository.findOne({
+        where: { id: deletedUser?.login.id },
+        withDeleted: true,
+      });
+
+      if (deletedLogin) {
+        await loginRepository.recover(deletedLogin);
+        console.log(`🔄 로그인 정보 ${deletedLogin.id} 복원 완료`);
+      }
+    }
+  });
 });
