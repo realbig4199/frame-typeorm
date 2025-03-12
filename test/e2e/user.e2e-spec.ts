@@ -10,6 +10,7 @@ describe('UserController (E2E)', () => {
   let app: INestApplication;
   let jwtService: JwtAuthService;
   let accessToken: string;
+  let testUserUuid: string = '5706df93-f3eb-11ef-bed5-0242ac140003';
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -65,4 +66,22 @@ describe('UserController (E2E)', () => {
       expect(user).toHaveProperty('passid');
     }
   });
+
+  if (!process.env.TEST_TARGET || process.env.TEST_TARGET === 'getUser') {
+    it('/user/:uuid (GET) - 유저를 상세조회한다.', async () => {
+      const response = await request(app.getHttpServer())
+        .get(`/user/${testUserUuid}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(HttpStatus.OK);
+
+      console.log('Response Status:', response.status);
+      console.log('Response Body:', response.body);
+
+      expect(response.body).toHaveProperty('userUuid', testUserUuid);
+      expect(response.body).toHaveProperty('gender');
+      expect(response.body).toHaveProperty('phone');
+      expect(response.body).toHaveProperty('email');
+      expect(response.body).toHaveProperty('passid');
+    });
+  }
 });
