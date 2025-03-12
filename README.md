@@ -21,17 +21,6 @@ npm run migration:run
 ```
 
 ### 3. EsLint 자동 적용
-<details>
-  <summary>ESLint & Prettier 설정 (intellij)</summary>
-  <ol>
-    ![EsLint_setting.png](images/EsLint_setting.png)
-  <ol>
-  </ol>
-    ![Prettier_setting.png](images/Prettier_setting.png)
-  </ol>
-</details>
-<details>
-  <summary>ESLint & Prettier 설정 (vsCode)</summary>
-  <ol>
-  </ol>
-</details>
+```sh
+npm run lint
+```
