@@ -19,8 +19,8 @@ import {
 } from '@nestjs/swagger';
 import { JwtToken } from '@/api/jwt/jwt.dto';
 
-import { PaginationDtoTx } from '@/common/pagination.dto';
-import { CommonRx } from '@/common/common.dto';
+import { PaginationDtoTx } from '@/common/dto/pagination.dto';
+import { CommonRx } from '@/common/dto/common.dto';
 import { JwtGuard } from '@/api/jwt/jwt.guard';
 import { GetUsersDtoRx } from './dto/getUsers.dto';
 import { GetUserDtoRx } from './dto/getUser.dto';

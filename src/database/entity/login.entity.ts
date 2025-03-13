@@ -1,9 +1,19 @@
-import { Column, Entity, OneToOne } from 'typeorm';
-import { BaseEntity } from '@/common/base.entity';
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { CommonEntity } from '@/database/entity/common.entity';
 import { UserEntity } from './user.entity';
+import { State } from '@/common/enums/state.type';
 
 @Entity({ name: 'logins' })
-export class LoginEntity extends BaseEntity {
+export class LoginEntity extends CommonEntity {
+  @PrimaryGeneratedColumn()
+  public id: number;
+
+  @Column({ unique: true, default: () => 'UUID()' })
+  public uuid: string;
+
+  @Column({ default: State.Activation })
+  public state: string;
+
   @Column({ unique: true })
   passid: string;
 

@@ -13,7 +13,7 @@ import { JwtStrategy } from './jwt.strategy';
     PassportModule,
     NestJwtModule.registerAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({}),
+      useFactory: () => ({}),
     }),
   ],
   providers: [JwtAuthService, JwtGuard, JwtStrategy],

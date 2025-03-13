@@ -1,6 +1,7 @@
-import { ConfigService } from '@/config/config.service';
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ConfigService } from '@/config/config.service';
+import { ResponseDto } from '@/common/dto/response.dto';
 
 export const setupSwagger = (app: INestApplication): void => {
   const config = app.get(ConfigService);
@@ -14,7 +15,10 @@ export const setupSwagger = (app: INestApplication): void => {
     )
     .build();
 
-  const document = SwaggerModule.createDocument(app, options);
+  const document = SwaggerModule.createDocument(app, options, {
+    extraModels: [ResponseDto], // ResponseDto를 Swagger 문서에 등록
+  });
+
   SwaggerModule.setup(config.get('swagger.path'), app, document, {
     jsonDocumentUrl: config.get('swagger.json'),
   });

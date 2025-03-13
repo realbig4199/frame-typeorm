@@ -28,7 +28,9 @@ export async function seed() {
     await loginRepository.save(login);
 
     const adminUser = userRepository.create({
-      // name: 'admin', // 엔터티 구조 변경에 따른 수정
+      name: 'admin',
+      phone: '01012345678',
+      email: 'admin',
       login: login,
     });
     await userRepository.save(adminUser);

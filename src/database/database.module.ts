@@ -5,6 +5,7 @@ import { DatabaseService } from './database.service';
 import { UserEntity } from './entity/user.entity';
 import { LoginEntity } from './entity/login.entity';
 import { DataSource } from 'typeorm';
+import { BoardEntity } from '@/database/entity/board.entity';
 
 @Global()
 @Module({
@@ -18,7 +19,7 @@ import { DataSource } from 'typeorm';
         username: configService.get<string>('database.username'),
         password: configService.get<string>('database.password'),
         database: configService.get<string>('database.database'),
-        entities: [UserEntity, LoginEntity],
+        entities: [UserEntity, LoginEntity, BoardEntity],
         synchronize: false,
         migrations: ['dist/database/migrations/*.js'],
         migrationsRun: true,
@@ -30,7 +31,7 @@ import { DataSource } from 'typeorm';
         return dataSource;
       },
     }),
-    TypeOrmModule.forFeature([UserEntity, LoginEntity]),
+    TypeOrmModule.forFeature([UserEntity, LoginEntity, BoardEntity]),
   ],
   providers: [DatabaseService],
   exports: [DatabaseService, TypeOrmModule],

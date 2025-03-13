@@ -9,8 +9,8 @@ import {
   RefreshTokenPayload,
   TokenType,
 } from '@/api/jwt/jwt.type';
-import { PaginationDtoTx } from '@/common/pagination.dto';
-import { CommonRx } from '@/common/common.dto';
+import { PaginationDtoTx } from '@/common/dto/pagination.dto';
+import { CommonRx } from '@/common/dto/common.dto';
 import { GetUsersDtoRx } from './dto/getUsers.dto';
 import { GetUserDtoRx } from './dto/getUser.dto';
 import { UpdateUserDtoTx } from './dto/updateUser.dto';
@@ -18,7 +18,7 @@ import { SignupDtoTx } from './dto/signup.dto';
 import { SigninDtoTx } from './dto/signin.dto';
 import { JwtAuthService } from '../jwt/jwt.service';
 import { LoginRepository } from '../login/login.repository';
-import { UserRepository } from './user.repository';
+import { UserCustomRepository } from './user-custom.repository';
 
 @Injectable()
 export class UserService {
@@ -28,7 +28,7 @@ export class UserService {
     private readonly config: ConfigService,
     private readonly cache: CacheService,
     private readonly loginRepository: LoginRepository,
-    private readonly userRepository: UserRepository,
+    private readonly userRepository: UserCustomRepository,
   ) {}
 
   /**
