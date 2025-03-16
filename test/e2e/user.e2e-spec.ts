@@ -12,7 +12,7 @@ describe('UserController (E2E)', () => {
   let app: INestApplication;
   let jwtService: JwtAuthService;
   let accessToken: string;
-  const testUserUuid: string = 'b6d7a364-f4f4-11ef-bed5-0242ac140003';
+  const testUserUuid: string = '085d129d-f4f5-11ef-bed5-0242ac140003';
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -57,7 +57,6 @@ describe('UserController (E2E)', () => {
         order: 'DESC',
       })
       .expect(HttpStatus.OK);
-    console.log('응답',response.body.result.users);
 
     expect(Array.isArray(response.body.result.users)).toBe(true);
     if (response.body.result.users.length > 0) {
@@ -75,12 +74,13 @@ describe('UserController (E2E)', () => {
       .get(`/user/${testUserUuid}`)
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.OK);
+    console.log('응답', response.body);
 
-    expect(response.body).toHaveProperty('userUuid', testUserUuid);
-    expect(response.body).toHaveProperty('gender');
-    expect(response.body).toHaveProperty('phone');
-    expect(response.body).toHaveProperty('email');
-    expect(response.body).toHaveProperty('passid');
+    expect(response.body.result).toHaveProperty('userUuid', testUserUuid);
+    expect(response.body.result).toHaveProperty('gender');
+    expect(response.body.result).toHaveProperty('phone');
+    expect(response.body.result).toHaveProperty('email');
+    expect(response.body.result).toHaveProperty('passid');
   });
 
   it('/user/:uuid (DELETE) - 유저를 삭제한다.', async () => {
