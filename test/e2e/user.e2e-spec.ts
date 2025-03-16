@@ -74,7 +74,6 @@ describe('UserController (E2E)', () => {
       .get(`/user/${testUserUuid}`)
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.OK);
-    console.log('응답', response.body);
 
     expect(response.body.result).toHaveProperty('userUuid', testUserUuid);
     expect(response.body.result).toHaveProperty('gender');
@@ -89,14 +88,13 @@ describe('UserController (E2E)', () => {
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(HttpStatus.OK);
 
-    expect(response.body).toEqual({
+    expect(response.body.result).toEqual({
       statusCode: HttpStatus.OK,
       message: '유저가 삭제되었습니다.',
     });
 
     console.log(`🗑 유저 ${testUserUuid} 삭제 완료`);
 
-    // 🔄 삭제된 유저 복원
     const dataSource = app.get(DataSource);
     if (dataSource && dataSource.isInitialized) {
       const userRepository = dataSource.getRepository(UserEntity);
@@ -105,7 +103,7 @@ describe('UserController (E2E)', () => {
       const deletedUser = await userRepository.findOne({
         where: { uuid: testUserUuid },
         relations: ['login'],
-        withDeleted: true, // soft delete 된 데이터 포함 조회
+        withDeleted: true,
       });
 
       if (deletedUser) {
@@ -113,7 +111,6 @@ describe('UserController (E2E)', () => {
         console.log(`🔄 유저 ${deletedUser.uuid} 복원 완료`);
       }
 
-      // 로그인 정보 복원
       const deletedLogin = await loginRepository.findOne({
         where: { id: deletedUser?.login.id },
         withDeleted: true,
