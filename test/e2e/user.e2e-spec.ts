@@ -12,7 +12,7 @@ describe('UserController (E2E)', () => {
   let app: INestApplication;
   let jwtService: JwtAuthService;
   let accessToken: string;
-  const testUserUuid: string = '5706df93-f3eb-11ef-bed5-0242ac140003';
+  const testUserUuid: string = 'b6d7a364-f4f4-11ef-bed5-0242ac140003';
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -57,10 +57,11 @@ describe('UserController (E2E)', () => {
         order: 'DESC',
       })
       .expect(HttpStatus.OK);
+    console.log('응답',response.body.result.users);
 
-    expect(Array.isArray(response.body.users)).toBe(true);
-    if (response.body.users.length > 0) {
-      const user = response.body.users[0];
+    expect(Array.isArray(response.body.result.users)).toBe(true);
+    if (response.body.result.users.length > 0) {
+      const user = response.body.result.users[0];
       expect(user).toHaveProperty('userUuid');
       expect(user).toHaveProperty('gender');
       expect(user).toHaveProperty('phone');
