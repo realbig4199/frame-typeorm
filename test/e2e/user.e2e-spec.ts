@@ -25,11 +25,11 @@ describe('UserController (E2E)', () => {
     jwtService = app.get(JwtAuthService);
 
     const accessPayload = await jwtService.generatePayload(
-      'test-user-uuid',
+      testUserUuid,
       TokenType.Access,
     );
     const refreshPayload = await jwtService.generatePayload(
-      'test-user-uuid',
+      testUserUuid,
       TokenType.Refresh,
     );
 
@@ -80,6 +80,44 @@ describe('UserController (E2E)', () => {
     expect(response.body.result).toHaveProperty('phone');
     expect(response.body.result).toHaveProperty('email');
     expect(response.body.result).toHaveProperty('passid');
+  });
+
+  it('/user/:uuid (PUT) - 유저를 수정한다.', async () => {
+    const updateUserDto = {
+      name: 'Updated Name',
+      gender: 'Updated Gender',
+      email: 'updated@example.com',
+      phone: '01012345678',
+    };
+
+    const response = await request(app.getHttpServer())
+      .put(`/user/${testUserUuid}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send(updateUserDto)
+      .expect(HttpStatus.OK);
+
+    expect(response.body.result).toEqual({
+      statusCode: HttpStatus.OK,
+      message: '유저가 수정되었습니다.',
+    });
+
+    console.log(`✏️ 유저 ${testUserUuid} 수정 완료`);
+
+    const dataSource = app.get(DataSource);
+    if (dataSource && dataSource.isInitialized) {
+      const userRepository = dataSource.getRepository(UserEntity);
+
+      const updatedUser = await userRepository.findOne({
+        where: { uuid: testUserUuid },
+        relations: ['login'],
+      });
+
+      expect(updatedUser).toBeDefined();
+      expect(updatedUser?.name).toBe(updateUserDto.name);
+      expect(updatedUser?.gender).toBe(updateUserDto.gender);
+      expect(updatedUser?.email).toBe(updateUserDto.email);
+      expect(updatedUser?.phone).toBe(updateUserDto.phone);
+    }
   });
 
   it('/user/:uuid (DELETE) - 유저를 삭제한다.', async () => {
