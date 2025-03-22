@@ -9,6 +9,7 @@ export const ERROR_CODES = {
   AUTH_TOKEN_EXPIRED: { code: 'E2001', message: '인증 토큰이 만료되었습니다.' },
   AUTH_INVALID_TOKEN: { code: 'E2002', message: '유효하지 않은 토큰입니다.' },
   AUTH_ACCESS_DENIED: { code: 'E2003', message: '접근 권한이 없습니다.' },
+  AUTH_INVALID_PASSWORD: { code: 'E2004', message: '잘못된 비밀번호입니다.' },
 
   // 데이터베이스 오류
   DATA_NOT_FOUND: { code: 'E3002', message: '요청한 데이터를 찾을 수 없습니다.' },

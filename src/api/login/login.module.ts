@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { LoginRepository } from './login.repository';
+import { LoginCustomRepository } from './login.repository';
 
 @Module({
   imports: [],
   controllers: [],
-  providers: [LoginRepository],
-  exports: [LoginRepository],
+  providers: [LoginCustomRepository],
+  exports: [LoginCustomRepository],
 })
 export class LoginModule {}

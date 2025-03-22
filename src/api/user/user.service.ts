@@ -17,10 +17,11 @@ import { UpdateUserDtoTx } from './dto/updateUser.dto';
 import { SignupDtoTx } from './dto/signup.dto';
 import { SigninDtoTx } from './dto/signin.dto';
 import { JwtAuthService } from '../jwt/jwt.service';
-import { LoginRepository } from '../login/login.repository';
+import { LoginCustomRepository } from '../login/login.repository';
 import { UserCustomRepository } from './user-custom.repository';
 import { CustomException } from '@/common/exceptions/custom-exception';
 import { ERROR_CODES } from '@/common/constants/error-codes';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class UserService {
@@ -29,7 +30,7 @@ export class UserService {
     private readonly jwt: JwtAuthService,
     private readonly config: ConfigService,
     private readonly cache: CacheService,
-    private readonly loginRepository: LoginRepository,
+    private readonly loginCustomRepository: LoginCustomRepository,
     private readonly userCustomRepository: UserCustomRepository,
   ) {}
 
@@ -38,11 +39,11 @@ export class UserService {
    * @description 유저를 조회한다.
    */
   public async getUsers(
-    user: AccessTokenPayload,
     query: PaginationDtoTx,
   ): Promise<GetUsersDtoRx> {
     try {
       const { startDate, endDate, page, limit, sortBy, order } = query;
+
       const result = await this.userCustomRepository.findWithPagination(
         page,
         limit,
@@ -51,6 +52,7 @@ export class UserService {
         sortBy,
         order,
       );
+
       const userDtos = result.items.map((user) => ({
         id: user.id,
         gender: user.gender,
@@ -58,6 +60,7 @@ export class UserService {
         email: user.email,
         passid: user.login.passid,
       }));
+      
       return {
         users: userDtos,
         totalItems: result.meta.totalItems,
@@ -80,7 +83,6 @@ export class UserService {
    * @description 유저를 상세조회한다.
    */
   public async getUser(
-    user: AccessTokenPayload,
     id: number,
   ): Promise<GetUserDtoRx> {
     try {
@@ -88,9 +90,11 @@ export class UserService {
         where: { id, deletedAt: null },
         relations: ['login'],
       });
+      
       if (!user) {
         throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
       }
+
       return {
         id: user.id,
         gender: user.gender,
@@ -115,63 +119,50 @@ export class UserService {
    * @author 김진태 <realbig4199@gmail.com>
    * @description 유저를 수정한다.
    */
+  @Transactional()
   public async updateUser(
     user: AccessTokenPayload,
-    uuid: string,
+    id: number,
     dto: UpdateUserDtoTx,
   ): Promise<CommonRx> {
     try {
-      return await this.database.transaction(async (manager) => {
-        const currentUser = await this.userCustomRepository.findByUuid(
-          user.userUuid,
-          manager,
-        );
+        const currentUser = await this.userCustomRepository.userRepository.findOne({
+          where: { id: user.userId },
+        })
 
         if (!currentUser) {
-          throw new HttpException(
-            `${user.userUuid}의 유저를 찾을 수 없습니다.`,
-            HttpStatus.NOT_FOUND,
-          );
+          throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
         }
 
-        const userToUpdate = await this.userCustomRepository.findByUuid(
-          uuid,
-          manager,
-        );
+        const userToUpdate = await this.userCustomRepository.userRepository.findOne({
+          where: { id },
+          relations: ['login'],
+        });
 
         if (!userToUpdate) {
-          throw new HttpException(
-            `${uuid}의 유저를 찾을 수 없습니다.`,
-            HttpStatus.NOT_FOUND,
-          );
+          throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
         }
 
-        if (currentUser.uuid !== userToUpdate.uuid) {
-          throw new HttpException(
-            '수정 권한이 없습니다.',
-            HttpStatus.UNAUTHORIZED,
-          );
+        if (currentUser.id !== userToUpdate.id) {
+          throw new CustomException(ERROR_CODES.AUTH_ACCESS_DENIED);
         }
 
-        // 엔터티 구조 변경에 따른 수정
-        // if (dto.name) {
-        //   await this.userRepository.update(uuid, { name: dto.name }, manager);
-        // }
+        const { password, ...updateData } = dto;
 
-        const { passid, ...updateData } = dto;
-
-        await this.loginRepository.update(
+        await this.loginCustomRepository.loginRepository.update(
           userToUpdate.login.id,
-          { passid },
-          manager,
-        );
-        await this.userCustomRepository.update(uuid, updateData, manager);
+          { password: password ? await brcypt.hash(password, 10) : userToUpdate.login.password },
+        )
+        
+        await this.userCustomRepository.userRepository.update(
+          userToUpdate.id,
+          updateData,
+        )
 
         return {
           statusCode: HttpStatus.OK,
           message: '유저가 수정되었습니다.',
         };
-      });
     } catch (err) {
       if (err instanceof HttpException) {
         throw err;
@@ -189,30 +180,42 @@ export class UserService {
    * @author 김진태 <realbig4199@gmail.com>
    * @description 유저를 삭제한다.
    */
+  @Transactional()
   public async deleteUser(
     user: AccessTokenPayload,
-    uuid: string,
+    id: number,
   ): Promise<CommonRx> {
     try {
-      return await this.database.transaction(async (manager) => {
-        const user = await this.userCustomRepository.findByUuid(uuid, manager);
+        const currentUser = await this.userCustomRepository.userRepository.findOne({
+          where: { id: user.userId },
+          relations: ['login'],
+        })
 
-        if (!user) {
-          throw new HttpException(
-            `${uuid}의 유저를 찾을 수 없습니다.`,
-            HttpStatus.NOT_FOUND,
-          );
+        if (!currentUser) {
+          throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
         }
 
-        await this.userCustomRepository.softDelete(uuid, manager);
+        const userToDelete = await this.userCustomRepository.userRepository.findOne({
+          where: { id },
+          relations: ['login'],
+        });
 
-        await this.loginRepository.softDelete(user.login.id, manager);
+        if (!userToDelete) {
+          throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
+        }
+
+        if (currentUser.id !== userToDelete.id) {
+          throw new CustomException(ERROR_CODES.AUTH_ACCESS_DENIED);
+        }
+
+        await this.userCustomRepository.userRepository.softDelete(id);
+
+        await this.loginCustomRepository.loginRepository.softDelete(userToDelete.login.id)
 
         return {
           statusCode: HttpStatus.OK,
           message: '유저가 삭제되었습니다.',
         };
-      });
     } catch (err) {
       if (err instanceof HttpException) {
         throw err;
@@ -230,47 +233,37 @@ export class UserService {
    * @author 김진태 <realbig4199@gmail.com>
    * @description 유저를 생성한다. (회원가입)
    */
+  @Transactional()
   public async signup(dto: SignupDtoTx): Promise<JwtToken> {
     try {
-      return await this.database.transaction(async (manager) => {
-        const existingUser = await this.loginRepository.findByPassid(
-          dto.passid,
-          manager,
-        );
+        const existingUser = await this.loginCustomRepository.loginRepository.findOne({
+          where: { passid: dto.passid},
+          relations: ['user'],
+        })
 
         if (existingUser) {
-          throw new HttpException(
-            `${dto.passid}의 유저는 이미 존재합니다.`,
-            HttpStatus.CONFLICT,
-          );
+          throw new CustomException(ERROR_CODES.USER_ALREADY_EXISTS);
         }
 
         const hashedPassword = await brcypt.hash(dto.password, 10);
 
-        const newLogin = await this.loginRepository.create(
-          {
-            passid: dto.passid,
-            password: hashedPassword,
-          },
-          manager,
-        );
+        const newLogin  = await this.loginCustomRepository.loginRepository.save({
+          passid: dto.passid,
+          password: hashedPassword,
+        })
 
-        const newUser = await this.userCustomRepository.create(
-          {
-            // name: dto.name, // 엔터티 구조 변경에 따른 수정
+        const newUser = await this.userCustomRepository.userRepository.save({
             gender: dto.gender,
             phone: dto.phone,
             email: dto.email,
             login: newLogin,
-          },
-          manager,
-        );
+        })
 
         const accessPayload: AccessTokenPayload =
-          await this.jwt.generatePayload(newUser.uuid, TokenType.Access);
+          await this.jwt.generatePayload(newUser.id, TokenType.Access);
 
         const refreshPayload: RefreshTokenPayload =
-          await this.jwt.generatePayload(newUser.uuid, TokenType.Refresh);
+          await this.jwt.generatePayload(newUser.id, TokenType.Refresh);
 
         const token = await this.jwt.generateToken(
           accessPayload,
@@ -284,7 +277,6 @@ export class UserService {
         );
 
         return token;
-      });
     } catch (err) {
       if (err instanceof HttpException) {
         throw err;
@@ -304,45 +296,34 @@ export class UserService {
    */
   public async signin(dto: SigninDtoTx): Promise<CommonRx | JwtToken> {
     try {
-      return await this.database.transaction(async (manager) => {
-        const login = await this.loginRepository.findByPassid(
-          dto.passid,
-          manager,
-        );
+        const login = await this.loginCustomRepository.loginRepository.findOne({
+          where: { passid: dto.passid },
+          relations: ['user'],
+        })
 
         if (!login) {
-          throw new HttpException(
-            `${dto.passid}의 유저를 찾을 수 없습니다.`,
-            HttpStatus.NOT_FOUND,
-          );
+          throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
         }
 
         const isValid = await brcypt.compare(dto.password, login.password);
 
         if (!isValid) {
-          throw new HttpException(
-            '비밀번호가 일치하지 않습니다.',
-            HttpStatus.UNAUTHORIZED,
-          );
+          throw new CustomException(ERROR_CODES.AUTH_INVALID_PASSWORD);
         }
 
-        const user = await this.userCustomRepository.findByUuid(
-          login.user.uuid,
-          manager,
-        );
+        const user = await this.userCustomRepository.userRepository.findOne({
+          where: { id: login.user.id },
+        })
 
         if (!user) {
-          throw new HttpException(
-            `${user.uuid}의 유저를 찾을 수 없습니다.`,
-            HttpStatus.NOT_FOUND,
-          );
+          throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
         }
 
         const accessPayload: AccessTokenPayload =
-          await this.jwt.generatePayload(user.uuid, TokenType.Access);
+          await this.jwt.generatePayload(user.id, TokenType.Access);
 
         const refreshPayload: RefreshTokenPayload =
-          await this.jwt.generatePayload(user.uuid, TokenType.Refresh);
+          await this.jwt.generatePayload(user.id, TokenType.Refresh);
 
         const token = await this.jwt.generateToken(
           accessPayload,
@@ -356,7 +337,6 @@ export class UserService {
         );
 
         return token;
-      });
     } catch (err) {
       if (err instanceof HttpException) {
         throw err;

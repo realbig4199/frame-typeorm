@@ -6,15 +6,12 @@ export class TokenPayloadBase {
   public aud: string;
   public jti: string;
   public typ: string;
+  public userId: number;
 }
 
-export class AccessTokenPayload extends TokenPayloadBase {
-  userUuid: string;
-}
+export class AccessTokenPayload extends TokenPayloadBase {}
 
-export class RefreshTokenPayload extends TokenPayloadBase {
-  userUuid: string;
-}
+export class RefreshTokenPayload extends TokenPayloadBase {}
 
 export interface RequestWithUser extends Request {
   user: AccessTokenPayload;

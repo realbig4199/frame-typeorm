@@ -14,7 +14,6 @@ export class ConfigModule {
     const provider = {
       provide: ConfigService,
       useFactory: async () => {
-        // 플래그 추가
         const envFilePaths = Array.isArray(options.envFilePath)
           ? options.envFilePath
           : [options.envFilePath || resolve(process.cwd(), '.env')];

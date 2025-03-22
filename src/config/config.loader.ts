@@ -42,6 +42,5 @@ export const loadConfig = async (processEnv: any) => {
       },
     },
   };
-
   return config;
 };

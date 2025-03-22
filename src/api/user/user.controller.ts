@@ -44,8 +44,8 @@ export class UserController {
   @Get('/')
   @ApiOperation({ summary: '유저를 조회한다.' })
   @ApiResponse({ status: HttpStatus.OK, type: GetUsersDtoRx })
-  async getUsers(@Request() request: any, @Query() query: PaginationDtoTx) {
-    return await this.userService.getUsers(request.user, query);
+  async getUsers(@Query() query: PaginationDtoTx) {
+    return await this.userService.getUsers(query);
   }
 
   /**
@@ -58,10 +58,9 @@ export class UserController {
   @ApiOperation({ summary: '유저를 상세조회한다.' })
   @ApiResponse({ status: HttpStatus.OK, type: GetUserDtoRx })
   async getUser(
-    @Request() request: any,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    return await this.userService.getUser(request.user, id);
+    return await this.userService.getUser(id);
   }
 
   /**
@@ -70,15 +69,15 @@ export class UserController {
    */
   @UseGuards(JwtGuard)
   @ApiBearerAuth('Authorization')
-  @Put('/:uuid')
+  @Put('/:id')
   @ApiOperation({ summary: '유저를 수정한다.' })
   @ApiResponse({ status: HttpStatus.OK, type: CommonRx })
   async updateUser(
     @Request() request: any,
-    @Param('uuid') uuid: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateUserDtoTx,
   ) {
-    return await this.userService.updateUser(request.user, uuid, dto);
+    return await this.userService.updateUser(request.user, id, dto);
   }
 
   /**
@@ -87,11 +86,11 @@ export class UserController {
    */
   @UseGuards(JwtGuard)
   @ApiBearerAuth('Authorization')
-  @Delete('/:uuid')
+  @Delete('/:id')
   @ApiOperation({ summary: '유저를 삭제한다.' })
   @ApiResponse({ status: HttpStatus.OK, type: CommonRx })
-  async deleteUser(@Request() request: any, @Param('uuid') uuid: string) {
-    return await this.userService.deleteUser(request.user, uuid);
+  async deleteUser(@Request() request: any, @Param('id', ParseIntPipe) id: number) {
+    return await this.userService.deleteUser(request.user, id);
   }
 
   /**

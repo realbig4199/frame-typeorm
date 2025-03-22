@@ -62,15 +62,15 @@ export class JwtAuthService {
    * @description 페이로드를 구성한다.
    */
   public async generatePayload(
-    userUuid: string,
+    userId: number,
     typ: string,
   ): Promise<AccessTokenPayload | RefreshTokenPayload> {
     return {
-      sub: userUuid,
+      sub: userId.toString(),
       aud: this.config.get('jwt.audience'),
       iss: this.config.get('jwt.issuer'),
       jti: uuidv4(),
-      userUuid,
+      userId,
       typ,
     };
   }

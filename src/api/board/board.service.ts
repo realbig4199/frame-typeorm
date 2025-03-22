@@ -30,7 +30,9 @@ export class BoardService {
    * @param dto
    */
   public async createBoard(user: AccessTokenPayload, dto: CreateBoardDto) {
-    const existUser = await this.userCustomRepository.findByUuid(user.userUuid);
+    const existUser = await this.userCustomRepository.userRepository.findOne({
+      where: { id: user.userId },
+    })
     if (!existUser) {
       throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
     }
@@ -55,7 +57,9 @@ export class BoardService {
     id: number,
     dto: UpdateBoardDto,
   ): Promise<void> {
-    const existUser = await this.userCustomRepository.findByUuid(user.userUuid);
+    const existUser = await this.userCustomRepository.userRepository.findOne({
+      where: { id: user.userId },
+    })
     if (!existUser) {
       throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
     }
