@@ -1,11 +1,15 @@
 import { ConfigService } from '@/config/config.service';
-import { Global, Module } from '@nestjs/common';
+import { Global, Module, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseService } from './database.service';
 import { UserEntity } from './entity/user.entity';
 import { LoginEntity } from './entity/login.entity';
 import { DataSource } from 'typeorm';
 import { BoardEntity } from '@/database/entity/board.entity';
+import {
+  addTransactionalDataSource,
+  initializeTransactionalContext,
+} from 'typeorm-transactional';
 
 @Global()
 @Module({
@@ -24,6 +28,7 @@ import { BoardEntity } from '@/database/entity/board.entity';
         migrations: ['dist/database/migrations/*.js'],
         migrationsRun: true,
         migrationsTableName: 'migrations_history',
+        // logging: true, // 트랜잭션 확인용
       }),
       dataSourceFactory: async (options) => {
         const dataSource = new DataSource(options);
@@ -36,4 +41,11 @@ import { BoardEntity } from '@/database/entity/board.entity';
   providers: [DatabaseService],
   exports: [DatabaseService, TypeOrmModule],
 })
-export class DatabaseModule {}
+export class DatabaseModule implements OnModuleInit {
+  constructor(private readonly dataSource: DataSource) {}
+
+  onModuleInit() {
+    initializeTransactionalContext();
+    addTransactionalDataSource(this.dataSource);
+  }
+}
