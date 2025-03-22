@@ -120,6 +120,31 @@ describe('UserController (E2E)', () => {
     }
   });
 
+  it('/user/:uuid (PUT) - 권한이 없는 유저가 수정할 경우 401 오류 발생', async () => {
+    const anotherUserToken = await jwtService.generateToken(
+      await jwtService.generatePayload('another-user-uuid', TokenType.Access),
+      await jwtService.generatePayload('another-user-uuid', TokenType.Refresh),
+    );
+
+    const response = await request(app.getHttpServer())
+      .put(`/user/${testUserUuid}`)
+      .set('Authorization', `Bearer ${anotherUserToken.accessToken}`)
+      .send({
+        name: 'Unauthorized Update',
+      })
+      .expect(HttpStatus.UNAUTHORIZED);
+
+    console.log('결과', response.body);
+
+    expect(response.body).toMatchObject({
+      status: HttpStatus.UNAUTHORIZED,
+      code: null,
+      message: '수정 권한이 없습니다.',
+    });
+
+    console.log(`🚫 유저 ${testUserUuid} 수정 실패 - 권한 없음`);
+  });
+
   it('/user/:uuid (DELETE) - 유저를 삭제한다.', async () => {
     const response = await request(app.getHttpServer())
       .delete(`/user/${testUserUuid}`)

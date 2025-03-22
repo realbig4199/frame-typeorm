@@ -16,10 +16,15 @@ export class PaginationDtoTx {
   @IsString()
   public endDate: string;
 
-  @ApiProperty({ example: '0', description: '오프셋', default: 0 })
+  // @ApiProperty({ example: '0', description: '오프셋', default: 0 })
+  // @IsOptional()
+  // @IsNumber()
+  // public offset?: number;
+
+  @ApiProperty({ example: '1', description: '페이지', default: 1 })
   @IsOptional()
   @IsNumber()
-  public offset?: number;
+  public page?: number;
 
   @ApiProperty({ example: '10', description: '리밋', default: 10 })
   @IsOptional()

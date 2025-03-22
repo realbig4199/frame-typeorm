@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 const date = new Date();
 const formattedDate = date.toISOString().replace(/[-:T]/g, '').slice(0, 14);
@@ -8,8 +8,7 @@ const migrationsDir = path.join(__dirname, 'migrations');
 const filePath = path.join(migrationsDir, `${formattedDate}-migration.ts`);
 
 const template = `
-(() => {
-  const { MigrationInterface, QueryRunner, Table, TableColumn } = require('typeorm');
+  import { Table } from 'typeorm';
 
   module.exports = class Migration${formattedDate} {
     async up(queryRunner) {
@@ -20,7 +19,6 @@ const template = `
       // TODO: Write rollback logic here
     }
   };
-})();
 `;
 
 fs.mkdirSync(migrationsDir, { recursive: true });

@@ -17,7 +17,7 @@ async function createDataSource(): Promise<DataSource> {
     password: configService.get<string>('database.password') || 'recipot1!11',
     database: configService.get<string>('database.database') || 'recipot',
     entities: [UserEntity, LoginEntity, BoardEntity],
-    migrations: [__dirname + '/migrations/*.ts'], // `dist/` 경로 문제 해결
+    migrations: [__dirname + '/migrations/*.ts'],
     synchronize: false,
     migrationsTableName: 'migrations_history',
   });

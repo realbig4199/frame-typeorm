@@ -41,10 +41,9 @@ export class UserService {
   ): Promise<GetUsersDtoRx> {
     try {
       return await this.database.transaction(async (manager) => {
-        const { startDate, endDate, offset, limit, sortBy, order } = query;
-
-        const users = await this.userRepository.findWithPagination(
-          offset,
+        const { startDate, endDate, page, limit, sortBy, order } = query;
+        const result = await this.userRepository.findWithPagination(
+          page,
           limit,
           startDate,
           endDate,
@@ -52,18 +51,16 @@ export class UserService {
           order,
           manager,
         );
-
-        const userDtos = users.map((user) => ({
+        const userDtos = result.items.map((user) => ({
           userUuid: user.uuid,
-          // name: user.name, // 엔터티 구조 변경에 따른 수정
           gender: user.gender,
           phone: user.phone,
           email: user.email,
           passid: user.login.passid,
         }));
-
         return {
           users: userDtos,
+          totalItems: result.meta.totalItems,
         };
       });
     } catch (err) {

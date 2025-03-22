@@ -9,4 +9,7 @@ export class GetUsersDtoRx {
   @IsArray()
   @ValidateNested({ each: true })
   public users: GetUserDtoRx[];
+
+  @ApiProperty()
+  public totalItems: number;
 }
