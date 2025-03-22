@@ -38,9 +38,7 @@ export class UserService {
    * @author 김진태 <reabig4199@gmail.com>
    * @description 유저를 조회한다.
    */
-  public async getUsers(
-    query: PaginationDtoTx,
-  ): Promise<GetUsersDtoRx> {
+  public async getUsers(query: PaginationDtoTx): Promise<GetUsersDtoRx> {
     try {
       const { startDate, endDate, page, limit, sortBy, order } = query;
 
@@ -60,7 +58,7 @@ export class UserService {
         email: user.email,
         passid: user.login.passid,
       }));
-      
+
       return {
         users: userDtos,
         totalItems: result.meta.totalItems,
@@ -82,15 +80,13 @@ export class UserService {
    * @author 김진태 <realbig4199@gmail.com>
    * @description 유저를 상세조회한다.
    */
-  public async getUser(
-    id: number,
-  ): Promise<GetUserDtoRx> {
+  public async getUser(id: number): Promise<GetUserDtoRx> {
     try {
       const user = await this.userCustomRepository.userRepository.findOne({
         where: { id, deletedAt: null },
         relations: ['login'],
       });
-      
+
       if (!user) {
         throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
       }
@@ -126,43 +122,49 @@ export class UserService {
     dto: UpdateUserDtoTx,
   ): Promise<CommonRx> {
     try {
-        const currentUser = await this.userCustomRepository.userRepository.findOne({
+      const currentUser =
+        await this.userCustomRepository.userRepository.findOne({
           where: { id: user.userId },
-        })
+        });
 
-        if (!currentUser) {
-          throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
-        }
+      if (!currentUser) {
+        throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
+      }
 
-        const userToUpdate = await this.userCustomRepository.userRepository.findOne({
+      const userToUpdate =
+        await this.userCustomRepository.userRepository.findOne({
           where: { id },
           relations: ['login'],
         });
 
-        if (!userToUpdate) {
-          throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
-        }
+      if (!userToUpdate) {
+        throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
+      }
 
-        if (currentUser.id !== userToUpdate.id) {
-          throw new CustomException(ERROR_CODES.AUTH_ACCESS_DENIED);
-        }
+      if (currentUser.id !== userToUpdate.id) {
+        throw new CustomException(ERROR_CODES.AUTH_ACCESS_DENIED);
+      }
 
-        const { password, ...updateData } = dto;
+      const { password, ...updateData } = dto;
 
-        await this.loginCustomRepository.loginRepository.update(
-          userToUpdate.login.id,
-          { password: password ? await brcypt.hash(password, 10) : userToUpdate.login.password },
-        )
-        
-        await this.userCustomRepository.userRepository.update(
-          userToUpdate.id,
-          updateData,
-        )
+      await this.loginCustomRepository.loginRepository.update(
+        userToUpdate.login.id,
+        {
+          password: password
+            ? await brcypt.hash(password, 10)
+            : userToUpdate.login.password,
+        },
+      );
 
-        return {
-          statusCode: HttpStatus.OK,
-          message: '유저가 수정되었습니다.',
-        };
+      await this.userCustomRepository.userRepository.update(
+        userToUpdate.id,
+        updateData,
+      );
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: '유저가 수정되었습니다.',
+      };
     } catch (err) {
       if (err instanceof HttpException) {
         throw err;
@@ -186,36 +188,40 @@ export class UserService {
     id: number,
   ): Promise<CommonRx> {
     try {
-        const currentUser = await this.userCustomRepository.userRepository.findOne({
+      const currentUser =
+        await this.userCustomRepository.userRepository.findOne({
           where: { id: user.userId },
           relations: ['login'],
-        })
+        });
 
-        if (!currentUser) {
-          throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
-        }
+      if (!currentUser) {
+        throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
+      }
 
-        const userToDelete = await this.userCustomRepository.userRepository.findOne({
+      const userToDelete =
+        await this.userCustomRepository.userRepository.findOne({
           where: { id },
           relations: ['login'],
         });
 
-        if (!userToDelete) {
-          throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
-        }
+      if (!userToDelete) {
+        throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
+      }
 
-        if (currentUser.id !== userToDelete.id) {
-          throw new CustomException(ERROR_CODES.AUTH_ACCESS_DENIED);
-        }
+      if (currentUser.id !== userToDelete.id) {
+        throw new CustomException(ERROR_CODES.AUTH_ACCESS_DENIED);
+      }
 
-        await this.userCustomRepository.userRepository.softDelete(id);
+      await this.userCustomRepository.userRepository.softDelete(id);
 
-        await this.loginCustomRepository.loginRepository.softDelete(userToDelete.login.id)
+      await this.loginCustomRepository.loginRepository.softDelete(
+        userToDelete.login.id,
+      );
 
-        return {
-          statusCode: HttpStatus.OK,
-          message: '유저가 삭제되었습니다.',
-        };
+      return {
+        statusCode: HttpStatus.OK,
+        message: '유저가 삭제되었습니다.',
+      };
     } catch (err) {
       if (err instanceof HttpException) {
         throw err;
@@ -236,47 +242,47 @@ export class UserService {
   @Transactional()
   public async signup(dto: SignupDtoTx): Promise<JwtToken> {
     try {
-        const existingUser = await this.loginCustomRepository.loginRepository.findOne({
-          where: { passid: dto.passid},
+      const existingUser =
+        await this.loginCustomRepository.loginRepository.findOne({
+          where: { passid: dto.passid },
           relations: ['user'],
-        })
+        });
 
-        if (existingUser) {
-          throw new CustomException(ERROR_CODES.USER_ALREADY_EXISTS);
-        }
+      if (existingUser) {
+        throw new CustomException(ERROR_CODES.USER_ALREADY_EXISTS);
+      }
 
-        const hashedPassword = await brcypt.hash(dto.password, 10);
+      const hashedPassword = await brcypt.hash(dto.password, 10);
 
-        const newLogin  = await this.loginCustomRepository.loginRepository.save({
-          passid: dto.passid,
-          password: hashedPassword,
-        })
+      const newLogin = await this.loginCustomRepository.loginRepository.save({
+        passid: dto.passid,
+        password: hashedPassword,
+      });
 
-        const newUser = await this.userCustomRepository.userRepository.save({
-            gender: dto.gender,
-            phone: dto.phone,
-            email: dto.email,
-            login: newLogin,
-        })
+      const newUser = await this.userCustomRepository.userRepository.save({
+        gender: dto.gender,
+        phone: dto.phone,
+        email: dto.email,
+        login: newLogin,
+      });
 
-        const accessPayload: AccessTokenPayload =
-          await this.jwt.generatePayload(newUser.id, TokenType.Access);
+      const accessPayload: AccessTokenPayload = await this.jwt.generatePayload(
+        newUser.id,
+        TokenType.Access,
+      );
 
-        const refreshPayload: RefreshTokenPayload =
-          await this.jwt.generatePayload(newUser.id, TokenType.Refresh);
+      const refreshPayload: RefreshTokenPayload =
+        await this.jwt.generatePayload(newUser.id, TokenType.Refresh);
 
-        const token = await this.jwt.generateToken(
-          accessPayload,
-          refreshPayload,
-        );
+      const token = await this.jwt.generateToken(accessPayload, refreshPayload);
 
-        await this.cache.set(
-          newUser.id.toString(),
-          token.refreshToken,
-          86400 * 1000,
-        );
+      await this.cache.set(
+        newUser.id.toString(),
+        token.refreshToken,
+        86400 * 1000,
+      );
 
-        return token;
+      return token;
     } catch (err) {
       if (err instanceof HttpException) {
         throw err;
@@ -296,47 +302,46 @@ export class UserService {
    */
   public async signin(dto: SigninDtoTx): Promise<CommonRx | JwtToken> {
     try {
-        const login = await this.loginCustomRepository.loginRepository.findOne({
-          where: { passid: dto.passid },
-          relations: ['user'],
-        })
+      const login = await this.loginCustomRepository.loginRepository.findOne({
+        where: { passid: dto.passid },
+        relations: ['user'],
+      });
 
-        if (!login) {
-          throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
-        }
+      if (!login) {
+        throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
+      }
 
-        const isValid = await brcypt.compare(dto.password, login.password);
+      const isValid = await brcypt.compare(dto.password, login.password);
 
-        if (!isValid) {
-          throw new CustomException(ERROR_CODES.AUTH_INVALID_PASSWORD);
-        }
+      if (!isValid) {
+        throw new CustomException(ERROR_CODES.AUTH_INVALID_PASSWORD);
+      }
 
-        const user = await this.userCustomRepository.userRepository.findOne({
-          where: { id: login.user.id },
-        })
+      const user = await this.userCustomRepository.userRepository.findOne({
+        where: { id: login.user.id },
+      });
 
-        if (!user) {
-          throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
-        }
+      if (!user) {
+        throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
+      }
 
-        const accessPayload: AccessTokenPayload =
-          await this.jwt.generatePayload(user.id, TokenType.Access);
+      const accessPayload: AccessTokenPayload = await this.jwt.generatePayload(
+        user.id,
+        TokenType.Access,
+      );
 
-        const refreshPayload: RefreshTokenPayload =
-          await this.jwt.generatePayload(user.id, TokenType.Refresh);
+      const refreshPayload: RefreshTokenPayload =
+        await this.jwt.generatePayload(user.id, TokenType.Refresh);
 
-        const token = await this.jwt.generateToken(
-          accessPayload,
-          refreshPayload,
-        );
+      const token = await this.jwt.generateToken(accessPayload, refreshPayload);
 
-        await this.cache.set(
-          user.id.toString(),
-          token.refreshToken,
-          86400 * 1000,
-        );
+      await this.cache.set(
+        user.id.toString(),
+        token.refreshToken,
+        86400 * 1000,
+      );
 
-        return token;
+      return token;
     } catch (err) {
       if (err instanceof HttpException) {
         throw err;

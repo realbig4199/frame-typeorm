@@ -57,9 +57,7 @@ export class UserController {
   @Get('/:id')
   @ApiOperation({ summary: '유저를 상세조회한다.' })
   @ApiResponse({ status: HttpStatus.OK, type: GetUserDtoRx })
-  async getUser(
-    @Param('id', ParseIntPipe) id: number,
-  ) {
+  async getUser(@Param('id', ParseIntPipe) id: number) {
     return await this.userService.getUser(id);
   }
 
@@ -89,7 +87,10 @@ export class UserController {
   @Delete('/:id')
   @ApiOperation({ summary: '유저를 삭제한다.' })
   @ApiResponse({ status: HttpStatus.OK, type: CommonRx })
-  async deleteUser(@Request() request: any, @Param('id', ParseIntPipe) id: number) {
+  async deleteUser(
+    @Request() request: any,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     return await this.userService.deleteUser(request.user, id);
   }
 
