@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsUUID } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 
 export class GetUserDtoRx {
-  @ApiProperty({ example: '유저 UUID' })
-  @IsUUID()
-  public userUuid: string;
+  @ApiProperty({ example: '아이디' })
+  @IsNumber()
+  public id: number;
 
   // 엔터티 구조 변경에 따른 수정
   // @ApiProperty({ example: '이름' })

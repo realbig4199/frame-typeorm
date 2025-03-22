@@ -19,6 +19,8 @@ import { SigninDtoTx } from './dto/signin.dto';
 import { JwtAuthService } from '../jwt/jwt.service';
 import { LoginRepository } from '../login/login.repository';
 import { UserCustomRepository } from './user-custom.repository';
+import { CustomException } from '@/common/exceptions/custom-exception';
+import { ERROR_CODES } from '@/common/constants/error-codes';
 
 @Injectable()
 export class UserService {
@@ -28,7 +30,7 @@ export class UserService {
     private readonly config: ConfigService,
     private readonly cache: CacheService,
     private readonly loginRepository: LoginRepository,
-    private readonly userRepository: UserCustomRepository,
+    private readonly userCustomRepository: UserCustomRepository,
   ) {}
 
   /**
@@ -40,29 +42,26 @@ export class UserService {
     query: PaginationDtoTx,
   ): Promise<GetUsersDtoRx> {
     try {
-      return await this.database.transaction(async (manager) => {
-        const { startDate, endDate, page, limit, sortBy, order } = query;
-        const result = await this.userRepository.findWithPagination(
-          page,
-          limit,
-          startDate,
-          endDate,
-          sortBy,
-          order,
-          manager,
-        );
-        const userDtos = result.items.map((user) => ({
-          userUuid: user.uuid,
-          gender: user.gender,
-          phone: user.phone,
-          email: user.email,
-          passid: user.login.passid,
-        }));
-        return {
-          users: userDtos,
-          totalItems: result.meta.totalItems,
-        };
-      });
+      const { startDate, endDate, page, limit, sortBy, order } = query;
+      const result = await this.userCustomRepository.findWithPagination(
+        page,
+        limit,
+        startDate,
+        endDate,
+        sortBy,
+        order,
+      );
+      const userDtos = result.items.map((user) => ({
+        id: user.id,
+        gender: user.gender,
+        phone: user.phone,
+        email: user.email,
+        passid: user.login.passid,
+      }));
+      return {
+        users: userDtos,
+        totalItems: result.meta.totalItems,
+      };
     } catch (err) {
       if (err instanceof HttpException) {
         throw err;
@@ -82,28 +81,23 @@ export class UserService {
    */
   public async getUser(
     user: AccessTokenPayload,
-    uuid: string,
+    id: number,
   ): Promise<GetUserDtoRx> {
     try {
-      return await this.database.transaction(async (manager) => {
-        const user = await this.userRepository.findByUuid(uuid, manager);
-
-        if (!user) {
-          throw new HttpException(
-            `${uuid}의 유저를 찾을 수 없습니다.`,
-            HttpStatus.NOT_FOUND,
-          );
-        }
-
-        return {
-          userUuid: user.uuid,
-          // name: user.name,
-          gender: user.gender,
-          phone: user.phone,
-          email: user.email,
-          passid: user.login.passid,
-        };
+      const user = await this.userCustomRepository.userRepository.findOne({
+        where: { id, deletedAt: null },
+        relations: ['login'],
       });
+      if (!user) {
+        throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
+      }
+      return {
+        id: user.id,
+        gender: user.gender,
+        phone: user.phone,
+        email: user.email,
+        passid: user.login.passid,
+      };
     } catch (err) {
       if (err instanceof HttpException) {
         throw err;
@@ -128,7 +122,7 @@ export class UserService {
   ): Promise<CommonRx> {
     try {
       return await this.database.transaction(async (manager) => {
-        const currentUser = await this.userRepository.findByUuid(
+        const currentUser = await this.userCustomRepository.findByUuid(
           user.userUuid,
           manager,
         );
@@ -140,7 +134,7 @@ export class UserService {
           );
         }
 
-        const userToUpdate = await this.userRepository.findByUuid(
+        const userToUpdate = await this.userCustomRepository.findByUuid(
           uuid,
           manager,
         );
@@ -171,7 +165,7 @@ export class UserService {
           { passid },
           manager,
         );
-        await this.userRepository.update(uuid, updateData, manager);
+        await this.userCustomRepository.update(uuid, updateData, manager);
 
         return {
           statusCode: HttpStatus.OK,
@@ -201,7 +195,7 @@ export class UserService {
   ): Promise<CommonRx> {
     try {
       return await this.database.transaction(async (manager) => {
-        const user = await this.userRepository.findByUuid(uuid, manager);
+        const user = await this.userCustomRepository.findByUuid(uuid, manager);
 
         if (!user) {
           throw new HttpException(
@@ -210,7 +204,7 @@ export class UserService {
           );
         }
 
-        await this.userRepository.softDelete(uuid, manager);
+        await this.userCustomRepository.softDelete(uuid, manager);
 
         await this.loginRepository.softDelete(user.login.id, manager);
 
@@ -261,7 +255,7 @@ export class UserService {
           manager,
         );
 
-        const newUser = await this.userRepository.create(
+        const newUser = await this.userCustomRepository.create(
           {
             // name: dto.name, // 엔터티 구조 변경에 따른 수정
             gender: dto.gender,
@@ -332,7 +326,7 @@ export class UserService {
           );
         }
 
-        const user = await this.userRepository.findByUuid(
+        const user = await this.userCustomRepository.findByUuid(
           login.user.uuid,
           manager,
         );

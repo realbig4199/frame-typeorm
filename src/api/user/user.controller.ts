@@ -10,6 +10,7 @@ import {
   Param,
   Put,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -53,11 +54,14 @@ export class UserController {
    */
   @UseGuards(JwtGuard)
   @ApiBearerAuth('Authorization')
-  @Get('/:uuid')
+  @Get('/:id')
   @ApiOperation({ summary: '유저를 상세조회한다.' })
   @ApiResponse({ status: HttpStatus.OK, type: GetUserDtoRx })
-  async getUser(@Request() request: any, @Param('uuid') uuid: string) {
-    return await this.userService.getUser(request.user, uuid);
+  async getUser(
+    @Request() request: any,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return await this.userService.getUser(request.user, id);
   }
 
   /**
