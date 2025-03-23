@@ -1,15 +1,12 @@
 import { ConfigService } from '@/config/config.service';
-import { Global, Module, OnModuleInit } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseService } from './database.service';
 import { UserEntity } from './entity/user.entity';
 import { LoginEntity } from './entity/login.entity';
 import { DataSource } from 'typeorm';
 import { BoardEntity } from '@/database/entity/board.entity';
-import {
-  addTransactionalDataSource,
-  initializeTransactionalContext,
-} from 'typeorm-transactional';
+import { addTransactionalDataSource } from 'typeorm-transactional';
 
 @Global()
 @Module({

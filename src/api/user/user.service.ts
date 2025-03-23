@@ -22,7 +22,6 @@ import { UserCustomRepository } from './user-custom.repository';
 import { CustomException } from '@/common/exceptions/custom-exception';
 import { ERROR_CODES } from '@/common/constants/error-codes';
 import { Transactional } from 'typeorm-transactional';
-import { EntityManager } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -84,7 +83,7 @@ export class UserService {
   public async getUser(id: number): Promise<GetUserDtoRx> {
     try {
       const user = await this.userCustomRepository.userRepository.findOne({
-        where: { id, deletedAt: null },
+        where: { id },
         relations: ['login'],
       });
 
@@ -179,10 +178,7 @@ export class UserService {
    * @description 유저를 삭제한다.
    */
   @Transactional()
-  public async deleteUser(
-    user: AccessTokenPayload,
-    id: number,
-  ) {
+  public async deleteUser(user: AccessTokenPayload, id: number) {
     try {
       const currentUser =
         await this.userCustomRepository.userRepository.findOne({
@@ -231,7 +227,7 @@ export class UserService {
    * @description 유저를 생성한다. (회원가입)
    */
   @Transactional()
-  public async signup(dto: SignupDtoTx, manager?: EntityManager): Promise<JwtToken> {
+  public async signup(dto: SignupDtoTx): Promise<JwtToken> {
     try {
       const existingUser =
         await this.loginCustomRepository.loginRepository.findOne({
