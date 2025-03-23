@@ -69,7 +69,7 @@ export class UserController {
   @ApiBearerAuth('Authorization')
   @Put('/:id')
   @ApiOperation({ summary: '유저를 수정한다.' })
-  @ApiResponse({ status: HttpStatus.OK, type: CommonRx })
+  @ApiResponse({ status: HttpStatus.OK })
   async updateUser(
     @Request() request: any,
     @Param('id', ParseIntPipe) id: number,
@@ -86,7 +86,7 @@ export class UserController {
   @ApiBearerAuth('Authorization')
   @Delete('/:id')
   @ApiOperation({ summary: '유저를 삭제한다.' })
-  @ApiResponse({ status: HttpStatus.OK, type: CommonRx })
+  @ApiResponse({ status: HttpStatus.OK })
   async deleteUser(
     @Request() request: any,
     @Param('id', ParseIntPipe) id: number,

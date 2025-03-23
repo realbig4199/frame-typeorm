@@ -33,7 +33,7 @@ import {
       dataSourceFactory: async (options) => {
         const dataSource = new DataSource(options);
         await dataSource.initialize();
-        return dataSource;
+        return addTransactionalDataSource(dataSource);
       },
     }),
     TypeOrmModule.forFeature([UserEntity, LoginEntity, BoardEntity]),
@@ -41,11 +41,4 @@ import {
   providers: [DatabaseService],
   exports: [DatabaseService, TypeOrmModule],
 })
-export class DatabaseModule implements OnModuleInit {
-  constructor(private readonly dataSource: DataSource) {}
-
-  onModuleInit() {
-    initializeTransactionalContext();
-    addTransactionalDataSource(this.dataSource);
-  }
-}
+export class DatabaseModule {}

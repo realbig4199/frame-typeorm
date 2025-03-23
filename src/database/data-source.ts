@@ -8,7 +8,6 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 async function createDataSource(): Promise<DataSource> {
-  console.log('김진태', process.env);
   const configData = await loadConfig(process.env);
   const configService = new ConfigService(configData);
 

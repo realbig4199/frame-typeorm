@@ -22,6 +22,7 @@ import { UserCustomRepository } from './user-custom.repository';
 import { CustomException } from '@/common/exceptions/custom-exception';
 import { ERROR_CODES } from '@/common/constants/error-codes';
 import { Transactional } from 'typeorm-transactional';
+import { EntityManager } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -120,7 +121,7 @@ export class UserService {
     user: AccessTokenPayload,
     id: number,
     dto: UpdateUserDtoTx,
-  ): Promise<CommonRx> {
+  ) {
     try {
       const currentUser =
         await this.userCustomRepository.userRepository.findOne({
@@ -160,11 +161,6 @@ export class UserService {
         userToUpdate.id,
         updateData,
       );
-
-      return {
-        statusCode: HttpStatus.OK,
-        message: '유저가 수정되었습니다.',
-      };
     } catch (err) {
       if (err instanceof HttpException) {
         throw err;
@@ -186,7 +182,7 @@ export class UserService {
   public async deleteUser(
     user: AccessTokenPayload,
     id: number,
-  ): Promise<CommonRx> {
+  ) {
     try {
       const currentUser =
         await this.userCustomRepository.userRepository.findOne({
@@ -217,11 +213,6 @@ export class UserService {
       await this.loginCustomRepository.loginRepository.softDelete(
         userToDelete.login.id,
       );
-
-      return {
-        statusCode: HttpStatus.OK,
-        message: '유저가 삭제되었습니다.',
-      };
     } catch (err) {
       if (err instanceof HttpException) {
         throw err;
@@ -240,7 +231,7 @@ export class UserService {
    * @description 유저를 생성한다. (회원가입)
    */
   @Transactional()
-  public async signup(dto: SignupDtoTx): Promise<JwtToken> {
+  public async signup(dto: SignupDtoTx, manager?: EntityManager): Promise<JwtToken> {
     try {
       const existingUser =
         await this.loginCustomRepository.loginRepository.findOne({
@@ -260,6 +251,7 @@ export class UserService {
       });
 
       const newUser = await this.userCustomRepository.userRepository.save({
+        name: dto.name,
         gender: dto.gender,
         phone: dto.phone,
         email: dto.email,
