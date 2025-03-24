@@ -36,7 +36,6 @@ export class UserCustomRepository {
           relations: ['login'],
         },
       );
-      console.log('조회 데이터 (레포지터리)', result);
 
       return result;
     } catch (err) {
