@@ -28,9 +28,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       const errorResponse = exception.getResponse() as any;
       return response.status(status).json(errorResponse);
     }
-
     // HttpException이면 ResponseDto.error()로 변환
-    if (exception instanceof HttpException) {
+    else if (exception instanceof HttpException) {
       status = exception.getStatus();
       const responseBody = exception.getResponse();
 
@@ -44,7 +43,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     this.logger.error(
-      `Unexpected Error: ${exception.message}`,
+      `Unexpected Error (${exception.constructor?.name}): ${exception.message}`,
       exception.stack,
     );
 

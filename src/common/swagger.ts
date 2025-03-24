@@ -3,23 +3,41 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@/config/config.service';
 import { ResponseDto } from '@/common/dto/response.dto';
 
-export const setupSwagger = (app: INestApplication): void => {
-  const config = app.get(ConfigService);
-  const options = new DocumentBuilder()
-    .setTitle(config.get('swagger.title'))
-    .setVersion(config.get('swagger.version'))
-    .setDescription(config.get('swagger.description'))
+export function setupSwagger(
+  app: INestApplication,
+  configService: ConfigService,
+) {
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle(configService.get<string>('swagger.title'))
+    .setDescription(configService.get<string>('swagger.description'))
+    .setVersion(configService.get<string>('swagger.version'))
     .addBearerAuth(
-      { type: 'http', scheme: 'bearer', name: 'JWT', in: 'header' },
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        in: 'header',
+      },
       'Authorization',
     )
     .build();
 
-  const document = SwaggerModule.createDocument(app, options, {
-    extraModels: [ResponseDto], // ResponseDto를 Swagger 문서에 등록
+  const document = SwaggerModule.createDocument(app, swaggerConfig, {
+    extraModels: [ResponseDto],
+    deepScanRoutes: true,
   });
 
-  SwaggerModule.setup(config.get('swagger.path'), app, document, {
-    jsonDocumentUrl: config.get('swagger.json'),
-  });
-};
+  SwaggerModule.setup(
+    configService.get<string>('swagger.path'),
+    app,
+    document,
+    {
+      jsonDocumentUrl: configService.get<string>('swagger.json'),
+      swaggerOptions: {
+        // docExpansion: 'none', // group 닫기
+        persistAuthorization: true, // 새로고침 토큰 유지
+      },
+    },
+  );
+}

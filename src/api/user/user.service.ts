@@ -1,7 +1,5 @@
-import { DatabaseService } from '@/database/database.service';
 import { Injectable } from '@nestjs/common';
 import * as brcypt from 'bcryptjs';
-import { ConfigService } from '@/config/config.service';
 import { CacheService } from '@/cache/cache.service';
 import { JwtToken } from '@/api/jwt/jwt.dto';
 import {
@@ -26,9 +24,7 @@ import { Transactional } from 'typeorm-transactional';
 @Injectable()
 export class UserService {
   constructor(
-    private readonly database: DatabaseService,
     private readonly jwt: JwtAuthService,
-    private readonly config: ConfigService,
     private readonly cache: CacheService,
     private readonly loginCustomRepository: LoginCustomRepository,
     private readonly userCustomRepository: UserCustomRepository,

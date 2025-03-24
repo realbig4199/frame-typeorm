@@ -116,8 +116,7 @@ export class BoardService {
     if (!board) {
       throw new CustomException(ERROR_CODES.DATA_NOT_FOUND);
     }
-    await this.databaseService.transaction(async (manager: EntityManager) => {
-      await manager.delete(BoardEntity, id);
-    });
+
+    await this.boardCustomRepository.boardRepository.delete(id);
   }
 }

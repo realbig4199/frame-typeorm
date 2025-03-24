@@ -1,12 +1,12 @@
 ## frame-typeorm
-### 1. 빠른 시작
+### 1. 로컬 환경 실행
 ```sh
 npm install
-docker-compose -f docker-compose.dev.yml -p recipot up -d
+docker-compose -f docker-compose.yml -p recipot up -d
 docker network create docker-network
 ```
 ```sh
-npm run start:dev
+npm run start
 ```
 
 ### 2. NestJS + TypeORM 마이그레이션 적용

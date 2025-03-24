@@ -1,46 +1,61 @@
-export const loadConfig = async (processEnv: any) => {
-  const config = {
-    httpPort: parseInt(processEnv.HTTP_PORT) || 8080,
+export const loadConfig = async (env: NodeJS.ProcessEnv = process.env) => {
+  return {
+    httpPort: env.HTTP_PORT ? Number(env.HTTP_PORT) : undefined,
+
     database: {
-      type: processEnv.DB_TYPE || 'mysql',
-      host: processEnv.DB_HOST || 'localhost',
-      port: parseInt(processEnv.DB_PORT, 10) || 3306,
-      username: processEnv.DB_USERNAME || 'recipot',
-      password: processEnv.DB_PASSWORD || 'recipot1!11',
-      database: processEnv.DB_DATABASE || 'recipot',
+      type: env.DB_TYPE,
+      host: env.DB_HOST,
+      port: env.DB_PORT ? Number(env.DB_PORT) : undefined,
+      username: env.DB_USERNAME,
+      password: env.DB_PASSWORD,
+      database: env.DB_DATABASE,
     },
+
     swagger: {
-      title: processEnv.SWAGGER_TITLE || 'Recipot API',
-      description: processEnv.SWAGGER_DESCRIPTION || 'Recipot API Document',
-      version: processEnv.SWAGGER_VERSION || '1.0.0',
-      path: processEnv.SWAGGER_PATH || '/api/document',
-      json: processEnv.SWAGGER_JSON || '/api/json',
+      title: env.SWAGGER_TITLE,
+      description: env.SWAGGER_DESCRIPTION,
+      version: env.SWAGGER_VERSION,
+      path: env.SWAGGER_PATH,
+      json: env.SWAGGER_JSON,
     },
+
     jwt: {
-      algorithm: processEnv.JWT_ALGORITHM || '',
-      issuer: processEnv.JWT_ISSUER || '',
-      audience: processEnv.JWT_AUDIENCE || '',
-      accessSecret: processEnv.JWT_ACCESS_SECRET || '',
-      accessExpire: parseInt(processEnv.JWT_ACCESS_EXPIRE) || 3600,
-      refreshSecret: processEnv.JWT_REFRESH_SECRET || '',
-      refreshExpire: parseInt(processEnv.JWT_REFRESH_EXPIRE) || 86400,
+      algorithm: env.JWT_ALGORITHM,
+      issuer: env.JWT_ISSUER,
+      audience: env.JWT_AUDIENCE,
+      accessSecret: env.JWT_ACCESS_SECRET,
+      accessExpire: env.JWT_ACCESS_EXPIRE
+        ? Number(env.JWT_ACCESS_EXPIRE)
+        : undefined,
+      refreshSecret: env.JWT_REFRESH_SECRET,
+      refreshExpire: env.JWT_REFRESH_EXPIRE
+        ? Number(env.JWT_REFRESH_EXPIRE)
+        : undefined,
     },
+
     redis: {
-      type: processEnv.REDIS_CONNECTION_TYPE || 'single',
-      host: processEnv.REDIS_CONNECTION_HOST || 'localhost',
-      port: parseInt(processEnv.REDIS_CONNECTION_PORT) || 6379,
-      url: `redis://${processEnv.REDIS_CONNECTION_HOST || 'localhost'}:${
-        parseInt(processEnv.REDIS_CONNECTION_PORT) || 6379
-      }`,
+      type: env.REDIS_CONNECTION_TYPE,
+      host: env.REDIS_CONNECTION_HOST,
+      port: env.REDIS_CONNECTION_PORT
+        ? Number(env.REDIS_CONNECTION_PORT)
+        : undefined,
+      url:
+        env.REDIS_CONNECTION_HOST && env.REDIS_CONNECTION_PORT
+          ? `redis://${env.REDIS_CONNECTION_HOST}:${env.REDIS_CONNECTION_PORT}`
+          : undefined,
       options: {
-        username: processEnv.REDIS_CONNECTION_USER || 'dev',
-        password: processEnv.REDIS_CONNECTION_PWD || 'dev1!11',
-        ttl: parseInt(processEnv.REDIS_CONNECTION_TTL) || 0,
-        retryAttempts:
-          parseInt(processEnv.REDIS_CONNECTION_RETRY_ATTEMPTS) || 5,
-        retryDelay: parseInt(processEnv.REDIS_CONNECTION_RETRY_DELAY) || 3000,
+        username: env.REDIS_CONNECTION_USER,
+        password: env.REDIS_CONNECTION_PWD,
+        ttl: env.REDIS_CONNECTION_TTL
+          ? Number(env.REDIS_CONNECTION_TTL)
+          : undefined,
+        retryAttempts: env.REDIS_CONNECTION_RETRY_ATTEMPTS
+          ? Number(env.REDIS_CONNECTION_RETRY_ATTEMPTS)
+          : undefined,
+        retryDelay: env.REDIS_CONNECTION_RETRY_DELAY
+          ? Number(env.REDIS_CONNECTION_RETRY_DELAY)
+          : undefined,
       },
     },
   };
-  return config;
 };

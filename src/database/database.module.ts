@@ -20,9 +20,9 @@ import { addTransactionalDataSource } from 'typeorm-transactional';
         username: configService.get<string>('database.username'),
         password: configService.get<string>('database.password'),
         database: configService.get<string>('database.database'),
-        entities: [UserEntity, LoginEntity, BoardEntity],
         synchronize: false,
-        migrations: ['dist/database/migrations/*.js'],
+        entities: [__dirname + '/entity/*.entity.{ts,js}'],
+        migrations: [__dirname + '/migrations/*.{ts,js}'],
         migrationsRun: true,
         migrationsTableName: 'migrations_history',
         // logging: true, // 트랜잭션 확인용

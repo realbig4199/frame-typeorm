@@ -10,6 +10,7 @@ import {
   Request,
   Query,
   Param,
+  Version,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -30,8 +31,8 @@ import { ResponseDto } from '@/common/dto/response.dto';
 import { BoardDto } from '@/api/board/dto/board.dto';
 import { AccessTokenPayload } from '@/api/jwt/jwt.type';
 
-@Controller('board')
-@ApiTags('board')
+@Controller({ path: 'board', version: '1' })
+@ApiTags('Board')
 export class BoardController {
   constructor(private readonly boardService: BoardService) {}
 
@@ -45,6 +46,7 @@ export class BoardController {
       properties: { result: { $ref: getSchemaPath(CreateBoardDto) } },
     },
   })
+  @Version('1')
   async createBoard(
     @Request() request: AccessTokenPayload,
     @Body() dto: CreateBoardDto,
@@ -72,6 +74,7 @@ export class BoardController {
       properties: { result: { $ref: getSchemaPath(Pagination<BoardDto>) } },
     },
   })
+  @Version('1')
   async getBoards(
     @Query() searchCriteria: SearchCriteriaDto,
     @Query('page') page: number = 1,

@@ -29,8 +29,8 @@ import { SignupDtoTx } from './dto/signup.dto';
 import { SigninDtoTx } from './dto/signin.dto';
 import { UserService } from './user.service';
 
-@Controller('user')
-@ApiTags('user')
+@Controller({ path: 'user', version: '1' })
+@ApiTags('User')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
