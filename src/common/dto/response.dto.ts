@@ -45,12 +45,4 @@ export class ResponseDto<T> {
   ): ResponseDto<null> {
     return new ResponseDto(status, error.code, error.message, null);
   }
-  toJSON() {
-    return {
-      status: this.status,
-      code: this.code,
-      message: this.message,
-      result: this.result,
-    };
-  }
 }

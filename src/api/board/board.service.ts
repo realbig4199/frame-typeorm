@@ -10,9 +10,6 @@ import { ERROR_CODES } from '@/common/constants/error-codes';
 import { BoardDto } from '@/api/board/dto/board.dto';
 import { AccessTokenPayload } from '@/api/jwt/jwt.type';
 import { plainToInstance } from 'class-transformer';
-import { DatabaseService } from '@/database/database.service';
-import { EntityManager } from 'typeorm';
-import { BoardEntity } from '@/database/entity/board.entity';
 
 @Injectable()
 export class BoardService {
@@ -21,7 +18,6 @@ export class BoardService {
     private readonly boardCustomRepository: BoardCustomRepository,
     @Inject(UserCustomRepository)
     private readonly userCustomRepository: UserCustomRepository,
-    private readonly databaseService: DatabaseService,
   ) {}
 
   /**
