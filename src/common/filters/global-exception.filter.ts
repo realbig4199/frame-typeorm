@@ -55,7 +55,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     this.logger.error(
-      `Unexpected Error (${exception.constructor?.name}): ${exception.message}`,
+      `${exception.constructor?.name}: ${exception.message}`,
       exception.stack,
     );
 
