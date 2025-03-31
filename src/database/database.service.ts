@@ -1,14 +1,23 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { DataSource, EntityManager } from 'typeorm';
+import { CustomLoggerService } from '@/common/logger/custom-logger.service';
+import { LoggerFactoryService } from '@/common/logger/logger-factory.service';
 
 @Injectable()
 export class DatabaseService implements OnModuleDestroy {
-  constructor(private readonly dataSource: DataSource) {}
+  private readonly logger: CustomLoggerService;
+
+  constructor(
+    private readonly loggerFactory: LoggerFactoryService,
+    private readonly dataSource: DataSource,
+  ) {
+    this.logger = this.loggerFactory.create(DatabaseService.name);
+  }
 
   public async initializeConnection(): Promise<void> {
     if (!this.dataSource.isInitialized) {
       await this.dataSource.initialize();
-      console.log('Database connection initialized');
+      this.logger.log('Database connection initialized');
     }
   }
 
@@ -44,7 +53,7 @@ export class DatabaseService implements OnModuleDestroy {
   async onModuleDestroy(): Promise<void> {
     if (this.dataSource.isInitialized) {
       await this.dataSource.destroy();
-      console.log('Database connection closed');
+      this.logger.log('Database connection closed');
     }
   }
 }

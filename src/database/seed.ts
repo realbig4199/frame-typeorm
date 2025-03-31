@@ -2,6 +2,12 @@ import { UserEntity } from './entity/user.entity';
 import { LoginEntity } from './entity/login.entity';
 import * as bcrypt from 'bcrypt';
 import dataSource from './data-source';
+import { CustomLoggerService } from '@/common/logger/custom-logger.service';
+import { winstonConfig } from '@/common/logger/winston.config';
+import winston from 'winston';
+
+const loggerInstance = winston.createLogger(winstonConfig);
+const logger = new CustomLoggerService(loggerInstance).setContext('Seeder');
 
 export async function seed() {
   try {
@@ -15,7 +21,7 @@ export async function seed() {
     });
 
     if (existingAdmin) {
-      console.log('Admin user already exists. Skipping seed.');
+      logger.log('Admin user already exists. Skipping seed.');
       return;
     }
 
@@ -35,9 +41,9 @@ export async function seed() {
     });
     await userRepository.save(adminUser);
 
-    console.log('Admin user created successfully.');
+    logger.log('Admin user created successfully.');
   } catch (error) {
-    console.error('Failed to seed admin user:', error);
+    logger.error('Failed to seed admin user', error.stack);
   } finally {
     await (await dataSource).destroy();
   }

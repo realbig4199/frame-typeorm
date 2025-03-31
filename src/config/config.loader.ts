@@ -1,23 +1,23 @@
 export const loadConfig = async (env: NodeJS.ProcessEnv = process.env) => {
   return {
-    httpPort: env.HTTP_PORT ? Number(env.HTTP_PORT) : undefined,
-
-    database: {
-      type: env.DB_TYPE,
-      host: env.DB_HOST,
-      port: env.DB_PORT ? Number(env.DB_PORT) : undefined,
-      username: env.DB_USERNAME,
-      password: env.DB_PASSWORD,
-      database: env.DB_DATABASE,
-    },
-
-    swagger: {
-      title: env.SWAGGER_TITLE,
-      description: env.SWAGGER_DESCRIPTION,
-      version: env.SWAGGER_VERSION,
-      path: env.SWAGGER_PATH,
-      json: env.SWAGGER_JSON,
-    },
+    // httpPort: env.HTTP_PORT ? Number(env.HTTP_PORT) : undefined,
+    //
+    // database: {
+    //   type: env.DB_TYPE,
+    //   host: env.DB_HOST,
+    //   port: env.DB_PORT ? Number(env.DB_PORT) : undefined,
+    //   username: env.DB_USERNAME,
+    //   password: env.DB_PASSWORD,
+    //   database: env.DB_DATABASE,
+    // },
+    //
+    // swagger: {
+    //   title: env.SWAGGER_TITLE,
+    //   description: env.SWAGGER_DESCRIPTION,
+    //   version: env.SWAGGER_VERSION,
+    //   path: env.SWAGGER_PATH,
+    //   json: env.SWAGGER_JSON,
+    // },
 
     jwt: {
       algorithm: env.JWT_ALGORITHM,

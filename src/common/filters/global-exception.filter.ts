@@ -5,15 +5,23 @@ import {
   HttpException,
   HttpStatus,
   Logger,
+  ExecutionContext,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ERROR_CODES } from '@/common/constants/error-codes';
 import { CustomException } from '@/common/exceptions/custom-exception';
 import { ResponseDto } from '@/common/dto/response.dto';
+import { CustomLoggerService } from '@/common/logger/custom-logger.service';
+import { LoggerFactoryService } from '@/common/logger/logger-factory.service';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(GlobalExceptionFilter.name);
+  private logger: CustomLoggerService;
+
+  constructor(private readonly loggerFactory: LoggerFactoryService) {
+    this.logger = this.loggerFactory.create(GlobalExceptionFilter.name);
+  }
+
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -26,6 +34,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     if (exception instanceof CustomException) {
       status = exception.getStatus();
       const errorResponse = exception.getResponse() as any;
+      this.logger.error(
+        `CustomException: ${exception.message}`,
+        exception.stack,
+      );
       return response.status(status).json(errorResponse);
     }
     // HttpException이면 ResponseDto.error()로 변환

@@ -7,22 +7,23 @@ import { LoginEntity } from './entity/login.entity';
 import { DataSource } from 'typeorm';
 import { BoardEntity } from '@/database/entity/board.entity';
 import { addTransactionalDataSource } from 'typeorm-transactional';
+import * as path from 'path'; // 경로를 위해 'path' 모듈을 임포트
 
 @Global()
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        type: 'mysql',
-        host: configService.get<string>('database.host'),
-        port: configService.get<number>('database.port'),
-        username: configService.get<string>('database.username'),
-        password: configService.get<string>('database.password'),
-        database: configService.get<string>('database.database'),
+      useFactory: async () => ({
+        type: process.env.DB_TYPE as 'mysql',
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT ? Number(process.env.DB_PORT) : undefined,
+        username: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_DATABASE,
         synchronize: false,
-        entities: [__dirname + '/entity/*.entity.{ts,js}'],
-        migrations: [__dirname + '/migrations/*.{ts,js}'],
+        entities: [path.join(__dirname, 'entity', '*.entity.{ts,js}')],
+        migrations: [path.join(__dirname, 'migrations', '*.{ts,js}')],
         migrationsRun: true,
         migrationsTableName: 'migrations_history',
         // logging: true, // 트랜잭션 확인용

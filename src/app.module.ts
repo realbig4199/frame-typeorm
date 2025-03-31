@@ -10,6 +10,7 @@ import { BoardModule } from '@/api/board/board.module';
 import { CacheModule } from '@/cache/cache.module';
 import { DatabaseModule } from '@/database/database.module';
 import { GlobalExceptionFilter } from '@/common/filters/global-exception.filter';
+import { LoggerModule } from '@/common/logger/logger.module';
 
 export const FeatureModules = [
   UserModule,
@@ -17,6 +18,7 @@ export const FeatureModules = [
   BoardModule,
   CacheModule,
   DatabaseModule,
+  LoggerModule,
 ];
 
 @Module({

@@ -1,16 +1,12 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ConfigService } from '@/config/config.service';
 import { ResponseDto } from '@/common/dto/response.dto';
 
-export function setupSwagger(
-  app: INestApplication,
-  configService: ConfigService,
-) {
+export function setupSwagger(app: INestApplication) {
   const swaggerConfig = new DocumentBuilder()
-    .setTitle(configService.get<string>('swagger.title'))
-    .setDescription(configService.get<string>('swagger.description'))
-    .setVersion(configService.get<string>('swagger.version'))
+    .setTitle(process.env.SWAGGER_TITLE)
+    .setDescription(process.env.SWAGGER_DESCRIPTION)
+    .setVersion(process.env.SWAGGER_VERSION)
     .addBearerAuth(
       {
         type: 'http',
@@ -28,16 +24,11 @@ export function setupSwagger(
     deepScanRoutes: true,
   });
 
-  SwaggerModule.setup(
-    configService.get<string>('swagger.path'),
-    app,
-    document,
-    {
-      jsonDocumentUrl: configService.get<string>('swagger.json'),
-      swaggerOptions: {
-        // docExpansion: 'none', // group 닫기
-        persistAuthorization: true, // 새로고침 토큰 유지
-      },
+  SwaggerModule.setup(process.env.SWAGGER_PATH, app, document, {
+    jsonDocumentUrl: process.env.SWAGGER_JSON,
+    swaggerOptions: {
+      // docExpansion: 'none', // group 닫기
+      persistAuthorization: true, // 새로고침 토큰 유지
     },
-  );
+  });
 }

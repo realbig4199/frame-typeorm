@@ -20,15 +20,22 @@ import { UserCustomRepository } from './user-custom.repository';
 import { CustomException } from '@/common/exceptions/custom-exception';
 import { ERROR_CODES } from '@/common/constants/error-codes';
 import { Transactional } from 'typeorm-transactional';
+import { CustomLoggerService } from '@/common/logger/custom-logger.service';
+import { LoggerFactoryService } from '@/common/logger/logger-factory.service';
 
 @Injectable()
 export class UserService {
+  private readonly logger: CustomLoggerService;
+
   constructor(
+    private readonly loggerFactory: LoggerFactoryService,
     private readonly jwt: JwtAuthService,
     private readonly cache: CacheService,
     private readonly loginCustomRepository: LoginCustomRepository,
     private readonly userCustomRepository: UserCustomRepository,
-  ) {}
+  ) {
+    this.logger = this.loggerFactory.create(UserService.name);
+  }
 
   /**
    * @author 김진태 <reabig4199@gmail.com>

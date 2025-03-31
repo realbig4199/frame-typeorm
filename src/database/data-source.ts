@@ -2,20 +2,15 @@ import * as dotenv from 'dotenv-flow';
 dotenv.config();
 
 import { DataSource } from 'typeorm';
-import { ConfigService } from '@/config/config.service';
-import { loadConfig } from '@/config/config.loader';
 
 async function createDataSource(): Promise<DataSource> {
-  const configData = await loadConfig(process.env);
-  const configService = new ConfigService(configData);
-
   return new DataSource({
-    type: 'mysql',
-    host: configService.get<string>('database.host'),
-    port: configService.get<number>('database.port'),
-    username: configService.get<string>('database.username'),
-    password: configService.get<string>('database.password'),
-    database: configService.get<string>('database.database'),
+    type: process.env.DB_TYPE as 'mysql',
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306, // 기본값 추가
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
     entities: [__dirname + '/entity/*.entity.{ts,js}'],
     migrations: [__dirname + '/migrations/*.{ts,js}'],
     synchronize: false,
