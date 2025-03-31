@@ -24,3 +24,17 @@ npm run migration:run
 ```sh
 npm run lint
 ```
+
+### 4. 개발환경 (dev) 시크릿 env 값 세팅
+1. 시크릿 오픈소스 Infisical 설치
+```sh
+brew install infisical/get-cli/infisical
+```
+2. token으로 로그인
+```sh
+infisical login --token <your_service_token_here>
+```
+3. 현재 로컬 프로젝트를 Infisical 프로젝트와 연결
+```sh
+infisical init
+```

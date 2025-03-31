@@ -33,7 +33,9 @@ async function bootstrap() {
   const port = config.get<number>('HTTP_PORT');
   await app.listen(port);
 
-  logger.log(`🚀 Server running on http://localhost:${port}`);
+  logger.log(
+    `🚀 Server running on http://localhost:${port} 🌱 [env: ${process.env.ENV}]`,
+  );
 }
 
 bootstrap().catch((err) => {
