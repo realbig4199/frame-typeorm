@@ -2,14 +2,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { BoardCustomRepository } from '@/api/board/board-custom.repository';
-import { SearchCriteriaDto } from '@/common/dto/search.criteria.dto';
-import { IPaginationOptions } from 'nestjs-typeorm-paginate';
 import { UserCustomRepository } from '@/api/user/user-custom.repository';
 import { CustomException } from '@/common/exceptions/custom-exception';
 import { ERROR_CODES } from '@/common/constants/error-codes';
 import { BoardDto } from '@/api/board/dto/board.dto';
 import { AccessTokenPayload } from '@/api/jwt/jwt.type';
 import { plainToInstance } from 'class-transformer';
+import { PaginationOptionsDto } from '@/common/dto/pagination-option.dto';
 
 @Injectable()
 export class BoardService {
@@ -76,17 +75,20 @@ export class BoardService {
 
   /**
    * 페이지네이션과 함께 게시글 목록을 조회합니다.
-   * @param searchCriteria
-   * @param paginationOptions
+   * @param paginationOptionDto
+   * @param startDate
+   * @param endDate
    */
   public async getBoards(
-    searchCriteria: SearchCriteriaDto,
-    paginationOptions: IPaginationOptions,
+    paginationOptionDto: PaginationOptionsDto,
+    startDate: string,
+    endDate: string,
   ): Promise<BoardDto[]> {
     const paginationResult =
       await this.boardCustomRepository.findWithPagination(
-        searchCriteria,
-        paginationOptions,
+        paginationOptionDto,
+        startDate,
+        endDate,
       );
 
     // class-transformer: entity to Dto

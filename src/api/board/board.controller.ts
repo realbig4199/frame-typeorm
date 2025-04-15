@@ -10,13 +10,11 @@ import {
   Request,
   Query,
   Param,
-  Version,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
-  ApiQuery,
   ApiResponse,
   ApiTags,
   getSchemaPath,
@@ -25,11 +23,11 @@ import { JwtGuard } from '@/api/jwt/jwt.guard';
 import { BoardService } from './board.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
-import { SearchCriteriaDto } from '@/common/dto/search.criteria.dto';
-import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
+import { Pagination } from 'nestjs-typeorm-paginate';
 import { ResponseDto } from '@/common/dto/response.dto';
 import { BoardDto } from '@/api/board/dto/board.dto';
 import { AccessTokenPayload } from '@/api/jwt/jwt.type';
+import { PaginationOptionsDto } from '@/common/dto/pagination-option.dto';
 
 @Controller({ path: 'board', version: '1' })
 @ApiTags('Board')
@@ -46,7 +44,6 @@ export class BoardController {
       properties: { result: { $ref: getSchemaPath(CreateBoardDto) } },
     },
   })
-  @Version('1')
   async createBoard(
     @Request() request: AccessTokenPayload,
     @Body() dto: CreateBoardDto,
@@ -56,32 +53,22 @@ export class BoardController {
 
   @Get('/')
   @ApiOperation({ summary: '게시글 목록을 조회한다.' })
-  @ApiQuery({
-    name: 'page',
-    required: true,
-    example: 1,
-    description: '페이지 번호',
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: true,
-    example: 10,
-    description: '페이지당 게시글 수',
-  })
   @ApiOkResponse({
     schema: {
       $ref: getSchemaPath(ResponseDto),
       properties: { result: { $ref: getSchemaPath(Pagination<BoardDto>) } },
     },
   })
-  @Version('1')
   async getBoards(
-    @Query() searchCriteria: SearchCriteriaDto,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
+    @Query() paginationOptionDto: PaginationOptionsDto,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
   ) {
-    const paginationOptions: IPaginationOptions = { page, limit };
-    return await this.boardService.getBoards(searchCriteria, paginationOptions);
+    return await this.boardService.getBoards(
+      paginationOptionDto,
+      startDate,
+      endDate,
+    );
   }
 
   @Get('/:id')

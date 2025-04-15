@@ -20,7 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { JwtToken } from '@/api/jwt/jwt.dto';
 
-import { PaginationDtoTx } from '@/common/dto/pagination.dto';
+import { PaginationOptionsDto } from '@/common/dto/pagination-option.dto';
 import { JwtGuard } from '@/api/jwt/jwt.guard';
 import { GetUsersDtoRx } from './dto/getUsers.dto';
 import { GetUserDtoRx } from './dto/getUser.dto';
@@ -43,8 +43,16 @@ export class UserController {
   @Get('/')
   @ApiOperation({ summary: '유저를 조회한다.' })
   @ApiResponse({ status: HttpStatus.OK, type: GetUsersDtoRx })
-  async getUsers(@Query() query: PaginationDtoTx) {
-    return await this.userService.getUsers(query);
+  async getUsers(
+    @Query() paginationOptionsDto: PaginationOptionsDto,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ) {
+    return await this.userService.getUsers(
+      paginationOptionsDto,
+      startDate,
+      endDate,
+    );
   }
 
   /**

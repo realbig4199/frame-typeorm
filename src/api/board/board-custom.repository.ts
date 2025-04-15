@@ -2,12 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { Between, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardEntity } from '@/database/entity/board.entity';
-import { SearchCriteriaDto } from '@/common/dto/search.criteria.dto';
-import {
-  IPaginationOptions,
-  paginate,
-  Pagination,
-} from 'nestjs-typeorm-paginate';
+import { paginate, Pagination } from 'nestjs-typeorm-paginate';
+import { PaginationOptionsDto } from '@/common/dto/pagination-option.dto';
 
 @Injectable()
 export class BoardCustomRepository {
@@ -18,14 +14,15 @@ export class BoardCustomRepository {
 
   /**
    * 페이징을 포함한 게시글 목록을 조회합니다.
-   * @param searchCriteria
    * @param paginationOptions
+   * @param startDate
+   * @param endDate
    */
   public async findWithPagination(
-    searchCriteria: SearchCriteriaDto,
-    paginationOptions: IPaginationOptions,
+    paginationOptions: PaginationOptionsDto,
+    startDate: string,
+    endDate: string,
   ): Promise<Pagination<BoardEntity>> {
-    const { startDate, endDate } = searchCriteria;
     const { page, limit } = paginationOptions;
 
     return await paginate<BoardEntity>(

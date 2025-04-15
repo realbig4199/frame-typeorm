@@ -7,7 +7,7 @@ import { setupSwagger } from '@/common/swagger';
 import { ConfigService } from '@/config/config.service';
 import { seed } from '@/database/seed';
 import { initializeTransactionalContext } from 'typeorm-transactional';
-import { VersioningType } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 
 import { WinstonModule } from 'nest-winston';
 import { winstonConfig } from '@/common/logger/winston.config';
@@ -23,9 +23,19 @@ async function bootstrap() {
 
   const config = app.get(ConfigService);
 
+  // API path version 명시
   app.enableVersioning({
     type: VersioningType.URI,
   });
+
+  // DTO validation check 활성화
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   setupSwagger(app);
   await seed();

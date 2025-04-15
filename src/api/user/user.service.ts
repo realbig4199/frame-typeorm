@@ -7,7 +7,7 @@ import {
   RefreshTokenPayload,
   TokenType,
 } from '@/api/jwt/jwt.type';
-import { PaginationDtoTx } from '@/common/dto/pagination.dto';
+import { PaginationOptionsDto } from '@/common/dto/pagination-option.dto';
 import { CommonRx } from '@/common/dto/common.dto';
 import { GetUsersDtoRx } from './dto/getUsers.dto';
 import { GetUserDtoRx } from './dto/getUser.dto';
@@ -41,8 +41,12 @@ export class UserService {
    * @author 김진태 <reabig4199@gmail.com>
    * @description 유저를 조회한다.
    */
-  public async getUsers(query: PaginationDtoTx): Promise<GetUsersDtoRx> {
-    const { startDate, endDate, page, limit, sortBy, order } = query;
+  public async getUsers(
+    paginationOptionsDto: PaginationOptionsDto,
+    startDate: string,
+    endDate: string,
+  ): Promise<GetUsersDtoRx> {
+    const { page, limit, sortBy, order } = paginationOptionsDto;
 
     const result = await this.userCustomRepository.findWithPagination(
       page,
