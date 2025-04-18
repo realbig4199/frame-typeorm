@@ -6,11 +6,6 @@ export class GetUserDtoRx {
   @IsNumber()
   public id: number;
 
-  // 엔터티 구조 변경에 따른 수정
-  // @ApiProperty({ example: '이름' })
-  // @IsString()
-  // public name: string;
-
   @ApiProperty({ example: '성별' })
   @IsString()
   public gender: string;

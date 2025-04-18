@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { UserEntity } from '@/database/entity/user.entity';
+import { CommonDto } from '@/common/dto/common.dto';
 
-export class BoardDto {
+export class BoardDto extends CommonDto {
   @ApiProperty({ example: 1, description: '게시글 ID' })
   @Expose()
   id: number;
@@ -23,17 +24,5 @@ export class BoardDto {
   @ApiProperty({ type: () => UserEntity, description: '수정자' })
   @Expose()
   @Type(() => UserEntity)
-  updateBy: UserEntity;
-
-  @ApiProperty({ example: '2024-03-10T12:00:00Z', description: '생성 일자' })
-  @Expose()
-  createdAt: Date;
-
-  @ApiProperty({ example: '2024-03-11T12:00:00Z', description: '수정 일자' })
-  @Expose()
-  updatedAt: Date;
-
-  @ApiProperty({ example: null, description: '삭제 일자' })
-  @Expose()
-  deletedAt?: Date;
+  updatedBy: UserEntity;
 }

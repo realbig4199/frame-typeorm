@@ -4,8 +4,6 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
-  Logger,
-  ExecutionContext,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ERROR_CODES } from '@/common/constants/error-codes';

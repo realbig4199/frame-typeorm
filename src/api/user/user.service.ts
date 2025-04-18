@@ -8,7 +8,7 @@ import {
   TokenType,
 } from '@/api/jwt/jwt.type';
 import { PaginationOptionsDto } from '@/common/dto/pagination-option.dto';
-import { CommonRx } from '@/common/dto/common.dto';
+import { CommonRxDto } from '@/common/dto/common.rx.dto';
 import { GetUsersDtoRx } from './dto/getUsers.dto';
 import { GetUserDtoRx } from './dto/getUser.dto';
 import { UpdateUserDtoTx } from './dto/updateUser.dto';
@@ -241,7 +241,7 @@ export class UserService {
    * @author 김진태 <realbig4199@gmail.com>
    * @description 로그인한다.
    */
-  public async signin(dto: SigninDtoTx): Promise<CommonRx | JwtToken> {
+  public async signin(dto: SigninDtoTx): Promise<CommonRxDto | JwtToken> {
     const login = await this.loginCustomRepository.loginRepository.findOne({
       where: { passid: dto.passid },
       relations: ['user'],

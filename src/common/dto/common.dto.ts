@@ -1,12 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsString } from 'class-validator';
+import { Expose } from 'class-transformer';
 
-export class CommonRx {
-  @ApiProperty({ example: '서버 코드' })
-  @IsBoolean()
-  public readonly statusCode: number;
+export class CommonDto {
+  @ApiProperty({ example: '2024-11-11 12:17:00', description: '생성 일자' })
+  @Expose()
+  createdAt: Date;
 
-  @ApiProperty({ example: '서버 메세지' })
-  @IsString()
-  public readonly message: string;
+  @ApiProperty({ example: '2024-11-11 12:17:00', description: '수정 일자' })
+  @Expose()
+  updatedAt: Date;
+
+  @ApiProperty({ example: null, description: '삭제 일자' })
+  @Expose()
+  deletedAt?: Date;
 }

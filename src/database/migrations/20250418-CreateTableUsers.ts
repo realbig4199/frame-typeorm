@@ -1,6 +1,6 @@
 import { Table } from 'typeorm';
 
-module.exports = class Migration20250304115256 {
+module.exports = class Migration20250418141423 {
   async up(queryRunner) {
     await queryRunner.createTable(
       new Table({
@@ -19,16 +19,16 @@ module.exports = class Migration20250304115256 {
           { name: 'password', type: 'varchar' },
           {
             name: 'createdAt',
-            type: 'timestamp',
+            type: 'datetime',
             default: 'CURRENT_TIMESTAMP',
           },
           {
             name: 'updatedAt',
-            type: 'timestamp',
+            type: 'datetime',
             default: 'CURRENT_TIMESTAMP',
             onUpdate: 'CURRENT_TIMESTAMP',
           },
-          { name: 'deletedAt', type: 'timestamp', isNullable: true },
+          { name: 'deletedAt', type: 'datetime', isNullable: true },
         ],
       }),
     );
@@ -53,16 +53,16 @@ module.exports = class Migration20250304115256 {
           { name: 'login_id', type: 'int', isUnique: true, isNullable: true },
           {
             name: 'createdAt',
-            type: 'timestamp',
+            type: 'datetime',
             default: 'CURRENT_TIMESTAMP',
           },
           {
             name: 'updatedAt',
-            type: 'timestamp',
+            type: 'datetime',
             default: 'CURRENT_TIMESTAMP',
             onUpdate: 'CURRENT_TIMESTAMP',
           },
-          { name: 'deletedAt', type: 'timestamp', isNullable: true },
+          { name: 'deletedAt', type: 'datetime', isNullable: true },
         ],
         foreignKeys: [
           {

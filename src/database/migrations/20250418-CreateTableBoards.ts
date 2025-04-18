@@ -1,6 +1,6 @@
 import { Table } from 'typeorm';
 
-module.exports = class Migration20250305120000 {
+module.exports = class Migration20250418141503 {
   async up(queryRunner) {
     await queryRunner.createTable(
       new Table({
@@ -19,29 +19,29 @@ module.exports = class Migration20250305120000 {
           { name: 'updatedBy', type: 'int', isNullable: true },
           {
             name: 'createdAt',
-            type: 'timestamp',
+            type: 'datetime',
             default: 'CURRENT_TIMESTAMP',
           },
           {
             name: 'updatedAt',
-            type: 'timestamp',
+            type: 'datetime',
             default: 'CURRENT_TIMESTAMP',
             onUpdate: 'CURRENT_TIMESTAMP',
           },
-          { name: 'deletedAt', type: 'timestamp', isNullable: true },
+          { name: 'deletedAt', type: 'datetime', isNullable: true },
         ],
         foreignKeys: [
           {
             columnNames: ['createdBy'],
             referencedTableName: 'users',
             referencedColumnNames: ['id'],
-            onDelete: 'CASCADE', // 유저 삭제 시 게시글도 삭제됨
+            onDelete: 'CASCADE',
           },
           {
             columnNames: ['updatedBy'],
             referencedTableName: 'users',
             referencedColumnNames: ['id'],
-            onDelete: 'SET NULL', // 유저가 삭제되면 updatedBy는 NULL로 설정
+            onDelete: 'SET NULL',
           },
         ],
       }),
