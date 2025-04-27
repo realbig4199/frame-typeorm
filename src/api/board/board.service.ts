@@ -8,6 +8,7 @@ import { ERROR_CODES } from '@/common/constants/error-codes';
 import { GetBoardsDtoRx } from '@/api/board/dto/get-boards.dto';
 import { AccessTokenPayload } from '@/api/jwt/jwt.type';
 import { PaginationOptionsDto } from '@/common/dto/pagination-option.dto';
+import { toBoardDto } from '@/api/board/mapper/board.mapper';
 
 @Injectable()
 export class BoardService {
@@ -23,7 +24,10 @@ export class BoardService {
    * @param user
    * @param dto
    */
-  public async createBoard(user: AccessTokenPayload, dto: CreateBoardDtoTx) {
+  public async createBoard(
+    user: AccessTokenPayload,
+    dto: CreateBoardDtoTx,
+  ): Promise<GetBoardsDtoRx> {
     const existUser = await this.userCustomRepository.userRepository.findOne({
       where: { id: user.userId },
     });
@@ -40,25 +44,7 @@ export class BoardService {
     const savedBoard =
       await this.boardCustomRepository.boardRepository.save(newBoard);
 
-    return {
-      id: savedBoard.id,
-      title: savedBoard.title,
-      content: savedBoard.content,
-      createdBy: {
-        id: savedBoard.createdBy.id,
-        gender: savedBoard.createdBy.gender,
-        phone: savedBoard.createdBy.phone,
-        email: savedBoard.createdBy.email,
-      },
-      createdAt: savedBoard.createdAt,
-      updatedBy: {
-        id: savedBoard.updatedBy.id,
-        gender: savedBoard.updatedBy.gender,
-        phone: savedBoard.updatedBy.phone,
-        email: savedBoard.updatedBy.email,
-      },
-      updatedAt: savedBoard.updatedAt,
-    };
+    return toBoardDto(savedBoard);
   }
 
   /**
@@ -111,25 +97,7 @@ export class BoardService {
         endDate,
       );
 
-    return paginationResult.items.map((board) => ({
-      id: board.id,
-      title: board.title,
-      content: board.content,
-      createdBy: {
-        id: board.createdBy.id,
-        gender: board.createdBy.gender,
-        phone: board.createdBy.phone,
-        email: board.createdBy.email,
-      },
-      createdAt: board.createdAt,
-      updatedBy: {
-        id: board.updatedBy.id,
-        gender: board.updatedBy.gender,
-        phone: board.updatedBy.phone,
-        email: board.updatedBy.email,
-      },
-      updatedAt: board.updatedAt,
-    }));
+    return paginationResult.items.map((board) => toBoardDto(board));
   }
 
   /**
