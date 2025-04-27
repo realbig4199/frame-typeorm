@@ -1,13 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateBoardDto } from './dto/create-board.dto';
-import { UpdateBoardDto } from './dto/update-board.dto';
+import { CreateBoardDtoTx } from './dto/create-board.dto';
+import { UpdateBoardDtoTx } from './dto/update-board.dto';
 import { BoardCustomRepository } from '@/api/board/board-custom.repository';
 import { UserCustomRepository } from '@/api/user/user-custom.repository';
 import { CustomException } from '@/common/exceptions/custom-exception';
 import { ERROR_CODES } from '@/common/constants/error-codes';
-import { BoardDto } from '@/api/board/dto/board.dto';
+import { GetBoardsDtoRx } from '@/api/board/dto/get-boards.dto';
 import { AccessTokenPayload } from '@/api/jwt/jwt.type';
-import { plainToInstance } from 'class-transformer';
 import { PaginationOptionsDto } from '@/common/dto/pagination-option.dto';
 
 @Injectable()
@@ -24,7 +23,7 @@ export class BoardService {
    * @param user
    * @param dto
    */
-  public async createBoard(user: AccessTokenPayload, dto: CreateBoardDto) {
+  public async createBoard(user: AccessTokenPayload, dto: CreateBoardDtoTx) {
     const existUser = await this.userCustomRepository.userRepository.findOne({
       where: { id: user.userId },
     });
@@ -38,7 +37,28 @@ export class BoardService {
       updatedBy: existUser,
     });
 
-    return await this.boardCustomRepository.boardRepository.save(newBoard);
+    const savedBoard =
+      await this.boardCustomRepository.boardRepository.save(newBoard);
+
+    return {
+      id: savedBoard.id,
+      title: savedBoard.title,
+      content: savedBoard.content,
+      createdBy: {
+        id: savedBoard.createdBy.id,
+        gender: savedBoard.createdBy.gender,
+        phone: savedBoard.createdBy.phone,
+        email: savedBoard.createdBy.email,
+      },
+      createdAt: savedBoard.createdAt,
+      updatedBy: {
+        id: savedBoard.updatedBy.id,
+        gender: savedBoard.updatedBy.gender,
+        phone: savedBoard.updatedBy.phone,
+        email: savedBoard.updatedBy.email,
+      },
+      updatedAt: savedBoard.updatedAt,
+    };
   }
 
   /**
@@ -50,7 +70,7 @@ export class BoardService {
   public async updateBoard(
     user: AccessTokenPayload,
     id: number,
-    dto: UpdateBoardDto,
+    dto: UpdateBoardDtoTx,
   ): Promise<void> {
     const existUser = await this.userCustomRepository.userRepository.findOne({
       where: { id: user.userId },
@@ -83,7 +103,7 @@ export class BoardService {
     paginationOptionDto: PaginationOptionsDto,
     startDate: string,
     endDate: string,
-  ): Promise<BoardDto[]> {
+  ): Promise<GetBoardsDtoRx[]> {
     const paginationResult =
       await this.boardCustomRepository.findWithPagination(
         paginationOptionDto,
@@ -91,10 +111,25 @@ export class BoardService {
         endDate,
       );
 
-    // class-transformer: entity to Dto
-    return paginationResult.items.map((board) =>
-      plainToInstance(BoardDto, board, { excludeExtraneousValues: true }),
-    );
+    return paginationResult.items.map((board) => ({
+      id: board.id,
+      title: board.title,
+      content: board.content,
+      createdBy: {
+        id: board.createdBy.id,
+        gender: board.createdBy.gender,
+        phone: board.createdBy.phone,
+        email: board.createdBy.email,
+      },
+      createdAt: board.createdAt,
+      updatedBy: {
+        id: board.updatedBy.id,
+        gender: board.updatedBy.gender,
+        phone: board.updatedBy.phone,
+        email: board.updatedBy.email,
+      },
+      updatedAt: board.updatedAt,
+    }));
   }
 
   /**

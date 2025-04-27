@@ -17,8 +17,4 @@ export class GetUserDtoRx {
   @ApiProperty({ example: '이메일' })
   @IsString()
   public email: string;
-
-  @ApiProperty({ example: '아이디' })
-  @IsString()
-  public passid: string;
 }

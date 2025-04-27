@@ -21,11 +21,11 @@ import {
 } from '@nestjs/swagger';
 import { JwtGuard } from '@/api/jwt/jwt.guard';
 import { BoardService } from './board.service';
-import { CreateBoardDto } from './dto/create-board.dto';
-import { UpdateBoardDto } from './dto/update-board.dto';
+import { CreateBoardDtoTx } from './dto/create-board.dto';
+import { UpdateBoardDtoTx } from './dto/update-board.dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { ResponseDto } from '@/common/dto/response.dto';
-import { BoardDto } from '@/api/board/dto/board.dto';
+import { GetBoardsDtoRx } from '@/api/board/dto/get-boards.dto';
 import { AccessTokenPayload } from '@/api/jwt/jwt.type';
 import { PaginationOptionsDto } from '@/common/dto/pagination-option.dto';
 
@@ -41,12 +41,12 @@ export class BoardController {
   @ApiOkResponse({
     schema: {
       $ref: getSchemaPath(ResponseDto),
-      properties: { result: { $ref: getSchemaPath(CreateBoardDto) } },
+      properties: { result: { $ref: getSchemaPath(CreateBoardDtoTx) } },
     },
   })
   async createBoard(
     @Request() request: AccessTokenPayload,
-    @Body() dto: CreateBoardDto,
+    @Body() dto: CreateBoardDtoTx,
   ) {
     return await this.boardService.createBoard(request, dto);
   }
@@ -56,7 +56,9 @@ export class BoardController {
   @ApiOkResponse({
     schema: {
       $ref: getSchemaPath(ResponseDto),
-      properties: { result: { $ref: getSchemaPath(Pagination<BoardDto>) } },
+      properties: {
+        result: { $ref: getSchemaPath(Pagination<GetBoardsDtoRx>) },
+      },
     },
   })
   async getBoards(
@@ -73,7 +75,14 @@ export class BoardController {
 
   @Get('/:id')
   @ApiOperation({ summary: '게시글을 상세 조회한다.' })
-  @ApiResponse({ status: HttpStatus.OK })
+  @ApiOkResponse({
+    schema: {
+      $ref: getSchemaPath(ResponseDto),
+      properties: {
+        result: { $ref: getSchemaPath(GetBoardsDtoRx) },
+      },
+    },
+  })
   async getBoard(@Param('id') id: number) {
     return await this.boardService.getBoardById(id);
   }
@@ -82,11 +91,18 @@ export class BoardController {
   @ApiBearerAuth('Authorization')
   @Put('/:id')
   @ApiOperation({ summary: '게시글을 수정한다.' })
-  @ApiResponse({ status: HttpStatus.OK })
+  @ApiOkResponse({
+    schema: {
+      $ref: getSchemaPath(ResponseDto),
+      properties: {
+        result: { example: null },
+      },
+    },
+  })
   async updateBoard(
     @Request() user: AccessTokenPayload,
     @Param('id') id: number,
-    @Body() dto: UpdateBoardDto,
+    @Body() dto: UpdateBoardDtoTx,
   ) {
     return await this.boardService.updateBoard(user, id, dto);
   }
@@ -95,7 +111,14 @@ export class BoardController {
   @ApiBearerAuth('Authorization')
   @Delete('/:id')
   @ApiOperation({ summary: '게시글을 삭제한다.' })
-  @ApiResponse({ status: HttpStatus.OK })
+  @ApiOkResponse({
+    schema: {
+      $ref: getSchemaPath(ResponseDto),
+      properties: {
+        result: { example: null },
+      },
+    },
+  })
   async deleteBoard(@Param('id') id: number) {
     return await this.boardService.deleteBoard(id);
   }

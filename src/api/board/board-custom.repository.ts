@@ -25,9 +25,8 @@ export class BoardCustomRepository {
   ): Promise<Pagination<BoardEntity>> {
     const { page, limit } = paginationOptions;
 
-    // startDate와 endDate를 KST 기준으로 UTC 변환
-    const start = new Date(startDate + 'T00:00:00.000+09:00'); // 한국 시간 (KST)
-    const end = new Date(endDate + 'T23:59:59.999+09:00'); // 한국 시간 (KST)
+    const start = new Date(startDate + 'T00:00:00.000+09:00');
+    const end = new Date(endDate + 'T23:59:59.999+09:00');
 
     return await paginate<BoardEntity>(
       this.boardRepository,
@@ -39,7 +38,7 @@ export class BoardCustomRepository {
         order: {
           createdAt: 'DESC',
         },
-        relations: ['createdBy'],
+        relations: ['createdBy', 'updatedBy'],
       },
     );
   }

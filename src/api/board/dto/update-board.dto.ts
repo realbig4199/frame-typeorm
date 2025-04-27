@@ -1,14 +1,4 @@
-import { IsString, IsOptional } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { PartialType } from '@nestjs/swagger';
+import { CreateBoardDtoTx } from '@/api/board/dto/create-board.dto';
 
-export class UpdateBoardDto {
-  @IsString()
-  @IsOptional()
-  @ApiProperty({ example: '제목' })
-  title?: string;
-
-  @IsString()
-  @IsOptional()
-  @ApiProperty({ example: '내용' })
-  content?: string;
-}
+export class UpdateBoardDtoTx extends PartialType(CreateBoardDtoTx) {}

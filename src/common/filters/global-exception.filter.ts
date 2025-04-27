@@ -28,7 +28,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     let code = ERROR_CODES.INTERNAL_SERVER_ERROR.code;
     let message = ERROR_CODES.INTERNAL_SERVER_ERROR.message;
 
-    // CustomException이면 그대로 반환
+    // CustomException 처리
     if (exception instanceof CustomException) {
       status = exception.getStatus();
       const errorResponse = exception.getResponse() as any;
@@ -38,7 +38,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       );
       return response.status(status).json(errorResponse);
     }
-    // HttpException이면 ResponseDto.error()로 변환
+
+    // HttpException 처리, ResponseDto.error()로 변환
     else if (exception instanceof HttpException) {
       status = exception.getStatus();
       const responseBody = exception.getResponse();
@@ -52,6 +53,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       code = responseBody['code'] || code;
     }
 
+    // etc. 에러 처리
     this.logger.error(
       `${exception.constructor?.name}: ${exception.message}`,
       exception.stack,
@@ -59,6 +61,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     return response
       .status(status)
-      .send(ResponseDto.error(status, { code, message }));
+      .json(ResponseDto.error(status, code, message));
   }
 }

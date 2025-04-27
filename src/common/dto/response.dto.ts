@@ -1,48 +1,62 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Expose, Transform } from 'class-transformer';
 
 export class ResponseDto<T> {
-  constructor(
-    status: number,
-    code: string | null,
-    message: string | null,
-    result: T | null,
-  ) {
+  constructor(status: number, result?: T, code?: string, message?: string) {
     this.status = status;
-    this.code = code ?? null;
-    this.message = message ?? null;
-    this.result = result;
+    if (result !== undefined) this.result = result;
+    if (code !== undefined) this.code = code;
+    if (message !== undefined) this.message = message;
   }
 
   @ApiProperty({ example: 200, description: 'HTTP 상태 코드' })
-  public status: number;
+  @Expose()
+  status: number;
 
   @ApiProperty({
-    example: null,
-    description: '실패 시만 존재, 성공 시 null',
+    description: '응답 데이터',
     nullable: true,
+    required: false,
   })
-  public code?: string | null;
+  @Expose()
+  @Transform(({ value }) => (value === undefined ? undefined : value), {
+    toPlainOnly: true, // JSON 응답 직렬화 시에만 적용
+  })
+  result?: T;
 
   @ApiProperty({
-    example: null,
-    description: '성공 시 null, 실패 시 메시지 포함',
+    description: '실패 시 서비스 에러 코드 반환',
+    required: false,
     nullable: true,
+    example: null,
   })
-  public message?: string | null;
+  @Expose()
+  @Transform(({ value }) => (value === undefined ? undefined : value), {
+    toPlainOnly: true,
+  })
+  code?: string;
 
-  @ApiProperty({ description: '응답 데이터', nullable: true })
-  public result: T | null = null;
+  @ApiProperty({
+    description: '실패 시 에러 메시지 반환',
+    required: false,
+    nullable: true,
+    example: null,
+  })
+  @Expose()
+  @Transform(({ value }) => (value === undefined ? undefined : value), {
+    toPlainOnly: true,
+  })
+  message?: string;
 
-  /** 성공 응답 (code와 message는 null) */
   static success<T>(result: T): ResponseDto<T> {
-    return new ResponseDto(200, null, null, result);
+    return new ResponseDto(200, result);
   }
 
-  /** 에러 응답 (result는 null) */
   static error(
     status: number,
-    error: { code: string; message: string },
+    code: string,
+    message: string,
   ): ResponseDto<null> {
-    return new ResponseDto(status, error.code, error.message, null);
+    return new ResponseDto(status, undefined, code, message);
   }
 }

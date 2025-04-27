@@ -94,7 +94,6 @@ export class UserService {
       gender: user.gender,
       phone: user.phone,
       email: user.email,
-      passid: user.login.passid,
     };
   }
 
