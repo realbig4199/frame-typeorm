@@ -15,6 +15,7 @@ import {
   ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
   getSchemaPath,
@@ -53,6 +54,18 @@ export class BoardController {
 
   @Get('/')
   @ApiOperation({ summary: '게시글 목록을 조회한다.' })
+  @ApiQuery({
+    name: 'startDate',
+    required: true,
+    description: '시작 날짜',
+    example: '2025-04-27',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: true,
+    description: '종료 날짜',
+    example: '2025-04-27',
+  })
   @ApiOkResponse({
     schema: {
       $ref: getSchemaPath(ResponseDto),
