@@ -17,7 +17,7 @@ import * as path from 'path'; // 경로를 위해 'path' 모듈을 임포트
       useFactory: async () => ({
         type: process.env.DB_TYPE as 'mysql',
         host: process.env.DB_HOST,
-        port: process.env.DB_PORT ? Number(process.env.DB_PORT) : undefined,
+        port: Number(process.env.DB_PORT),
         username: process.env.DB_USERNAME,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_DATABASE,
@@ -26,7 +26,6 @@ import * as path from 'path'; // 경로를 위해 'path' 모듈을 임포트
         migrations: [path.join(__dirname, 'migrations', '*.{ts,js}')],
         migrationsRun: true,
         migrationsTableName: 'migrations_history',
-        // logging: true, // 트랜잭션 확인용
       }),
       dataSourceFactory: async (options) => {
         const dataSource = new DataSource(options);

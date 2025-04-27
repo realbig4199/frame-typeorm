@@ -12,7 +12,8 @@ import { WinstonModule } from 'nest-winston';
 import { winstonConfig } from '@/common/logger/winston.config';
 import { LoggerFactoryService } from '@/common/logger/logger-factory.service';
 import dataSource from '@/database/data-source';
-import { runSeeders } from 'typeorm-extension';
+import { readFileSync, readdirSync } from 'fs';
+import { resolve, join } from 'path';
 
 async function bootstrap() {
   initializeTransactionalContext();
@@ -46,7 +47,13 @@ async function bootstrap() {
     await (await dataSource).initialize();
   }
   await (await dataSource).runMigrations();
-  await runSeeders(await dataSource);
+
+  const seedsDir = resolve(__dirname, '../src/database/seeds');
+  for (const file of readdirSync(seedsDir)
+    .filter((f) => f.endsWith('.sql'))
+    .sort()) {
+    await (await dataSource).query(readFileSync(join(seedsDir, file), 'utf8'));
+  }
   logger.log(`✅ Migration Successes.`);
 
   const port = config.get<number>('HTTP_PORT');
@@ -58,7 +65,6 @@ async function bootstrap() {
 }
 
 bootstrap().catch((err) => {
-  // bootstrap 실패 시 app이 초기화되지 않은 상태로, LoggerFactoryService 사용 불가
   const fallbackLogger = WinstonModule.createLogger(winstonConfig);
   fallbackLogger.error('❌ Failed to bootstrap the app', {
     stack: err.stack,
