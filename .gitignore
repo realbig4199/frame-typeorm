@@ -1,7 +1,21 @@
-node_modules
-dist
-docker
+# Node
+node_modules/
+
+# Build
+dist/
+
+# Docker
+docker/
+
+# IDE
 *.iml
+
+# Infisical
 .infisical*
-/logs
-.log
+
+# Logs
+/logs/
+*.log
+
+# macOS
+.DS_Store
