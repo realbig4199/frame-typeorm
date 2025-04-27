@@ -7,21 +7,24 @@ import {
   RefreshTokenPayload,
   TokenType,
 } from '@/api/jwt/jwt.type';
-import { PaginationOptionsDto } from '@/common/dto/pagination-option.dto';
-import { CommonRxDto } from '@/common/dto/common.rx.dto';
-import { GetUsersDtoRx } from './dto/getUsers.dto';
-import { GetUserDtoRx } from './dto/getUser.dto';
-import { UpdateUserDtoTx } from './dto/updateUser.dto';
+import { GetUsersDtoRx } from './dto/get-users.dto';
+import { UpdateUserDtoTx } from './dto/update-user.dto';
 import { SignupDtoTx } from './dto/signup.dto';
 import { SigninDtoTx } from './dto/signin.dto';
 import { JwtAuthService } from '../jwt/jwt.service';
-import { LoginCustomRepository } from '../login/login.repository';
 import { UserCustomRepository } from './user-custom.repository';
 import { CustomException } from '@/common/exceptions/custom-exception';
 import { ERROR_CODES } from '@/common/constants/error-codes';
 import { Transactional } from 'typeorm-transactional';
 import { CustomLoggerService } from '@/common/logger/custom-logger.service';
 import { LoggerFactoryService } from '@/common/logger/logger-factory.service';
+import { Between } from 'typeorm';
+import { LoginCustomRepository } from '../login/login.repository';
+import { GetUserDtoRx } from './dto/get-user.dto';
+import { SocialLoginCustomRepository } from '../social-login/social-login.repository';
+import { toUserDto } from './mapper/user.mapper';
+import { PaginationOptionsDto } from '@/common/dto/pagination-option.dto';
+import { CommonRxDto } from '@/common/dto/common.rx.dto';
 
 @Injectable()
 export class UserService {
@@ -32,6 +35,7 @@ export class UserService {
     private readonly jwt: JwtAuthService,
     private readonly cache: CacheService,
     private readonly loginCustomRepository: LoginCustomRepository,
+    private readonly socialLoginCustomRepository: SocialLoginCustomRepository,
     private readonly userCustomRepository: UserCustomRepository,
   ) {
     this.logger = this.loggerFactory.create(UserService.name);
@@ -48,29 +52,36 @@ export class UserService {
   ): Promise<GetUsersDtoRx> {
     const { page, limit, sortBy, order } = paginationOptionsDto;
 
-    const result = await this.userCustomRepository.findWithPagination(
+    const paginationOptions = {
       page,
       limit,
-      startDate,
-      endDate,
-      sortBy,
-      order,
+    };
+
+    const where: Record<string, any> = {};
+
+    if (startDate && endDate) {
+      where.createdAt = Between(new Date(startDate), new Date(endDate));
+    }
+
+    const searchOptions = {
+      where,
+      order: { [sortBy]: order },
+      relations: ['login', 'socialLogin'],
+    };
+
+    const result = await this.userCustomRepository.findWithPagination(
+      paginationOptions,
+      searchOptions,
     );
 
     if (!result || result.items.length === 0) {
       throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
     }
 
-    const userDtos = result.items.map((user) => ({
-      id: user.id,
-      gender: user.gender,
-      phone: user.phone,
-      email: user.email,
-      passid: user.login.passid,
-    }));
+    const userDtos = result.items.map(toUserDto);
 
     return {
-      users: userDtos,
+      results: userDtos,
       totalItems: result.meta.totalItems,
     };
   }
@@ -82,19 +93,14 @@ export class UserService {
   public async getUser(id: number): Promise<GetUserDtoRx> {
     const user = await this.userCustomRepository.userRepository.findOne({
       where: { id },
-      relations: ['login'],
+      relations: ['login', 'socialLogin'],
     });
 
     if (!user) {
       throw new CustomException(ERROR_CODES.USER_NOT_FOUND);
     }
 
-    return {
-      id: user.id,
-      gender: user.gender,
-      phone: user.phone,
-      email: user.email,
-    };
+    return toUserDto(user);
   }
 
   /**
@@ -118,7 +124,7 @@ export class UserService {
     const userToUpdate = await this.userCustomRepository.userRepository.findOne(
       {
         where: { id },
-        relations: ['login'],
+        relations: ['login', 'socialLogin'],
       },
     );
 
@@ -130,21 +136,7 @@ export class UserService {
       throw new CustomException(ERROR_CODES.AUTH_ACCESS_DENIED);
     }
 
-    const { password, ...updateData } = dto;
-
-    await this.loginCustomRepository.loginRepository.update(
-      userToUpdate.login.id,
-      {
-        password: password
-          ? await brcypt.hash(password, 10)
-          : userToUpdate.login.password,
-      },
-    );
-
-    await this.userCustomRepository.userRepository.update(
-      userToUpdate.id,
-      updateData,
-    );
+    await this.userCustomRepository.userRepository.update(userToUpdate.id, dto);
   }
 
   /**
@@ -155,7 +147,7 @@ export class UserService {
   public async deleteUser(user: AccessTokenPayload, id: number) {
     const currentUser = await this.userCustomRepository.userRepository.findOne({
       where: { id: user.userId },
-      relations: ['login'],
+      relations: ['login', 'socialLogin'],
     });
 
     if (!currentUser) {
@@ -165,7 +157,7 @@ export class UserService {
     const userToDelete = await this.userCustomRepository.userRepository.findOne(
       {
         where: { id },
-        relations: ['login'],
+        relations: ['login', 'socialLogin'],
       },
     );
 
@@ -179,9 +171,17 @@ export class UserService {
 
     await this.userCustomRepository.userRepository.softDelete(id);
 
-    await this.loginCustomRepository.loginRepository.softDelete(
-      userToDelete.login.id,
-    );
+    if (userToDelete.login) {
+      await this.loginCustomRepository.loginRepository.softDelete(
+        userToDelete.login.id,
+      );
+    }
+
+    if (userToDelete.socialLogin) {
+      await this.socialLoginCustomRepository.SocialLoginRepository.softDelete(
+        userToDelete.socialLogin.id,
+      );
+    }
   }
 
   /**
@@ -208,10 +208,10 @@ export class UserService {
     });
 
     const newUser = await this.userCustomRepository.userRepository.save({
-      name: dto.name,
-      gender: dto.gender,
-      phone: dto.phone,
-      email: dto.email,
+      nickName: dto.nickName,
+      cookingLevel: dto.cookingLevel,
+      householdType: dto.householdType,
+      job: dto.job,
       login: newLogin,
     });
 

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, ValidateNested } from 'class-validator';
-import { GetUserDtoRx } from './getUser.dto';
+import { GetUserDtoRx } from './get-user.dto';
 
 export class GetUsersDtoRx {
   @ApiProperty({
@@ -8,7 +8,7 @@ export class GetUsersDtoRx {
   })
   @IsArray()
   @ValidateNested({ each: true })
-  public users: GetUserDtoRx[];
+  public results: GetUserDtoRx[];
 
   @ApiProperty()
   public totalItems: number;

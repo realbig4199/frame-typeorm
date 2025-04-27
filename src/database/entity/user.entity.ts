@@ -7,37 +7,35 @@ import {
   OneToMany,
 } from 'typeorm';
 import { CommonEntity } from '@/database/entity/common.entity';
-import { LoginEntity } from './login.entity';
+import { SocialLoginEntity } from './social-login.entity';
 import { BoardEntity } from '@/database/entity/board.entity';
-import { State } from '@/common/enums/state.type';
+import { LoginEntity } from './login.entity';
 
 @Entity({ name: 'users' })
 export class UserEntity extends CommonEntity {
   @PrimaryGeneratedColumn()
   public id: number;
 
-  @Column({ unique: true, default: () => 'UUID()' })
-  public uuid: string;
-
-  @Column({ default: State.Activation })
-  public state: string;
+  @Column()
+  public nickName: string;
 
   @Column()
-  name: string;
+  public cookingLevel: string;
 
-  @Column({ type: 'varchar', default: 'Unknown' })
-  gender: string;
+  @Column()
+  public householdType: string;
 
-  @Column({ type: 'varchar', unique: true, nullable: true })
-  phone: string;
+  @Column()
+  public job: string;
 
-  @Column({ type: 'varchar', unique: true, nullable: true })
-  email: string;
+  @OneToOne(() => SocialLoginEntity, { nullable: true })
+  @JoinColumn({ name: 'socialLogin_id' })
+  public socialLogin?: SocialLoginEntity;
 
-  @OneToOne(() => LoginEntity, (login) => login.user)
+  @OneToOne(() => LoginEntity, { nullable: true })
   @JoinColumn({ name: 'login_id' })
-  login: LoginEntity;
+  public login?: LoginEntity;
 
   @OneToMany(() => BoardEntity, (board) => board.createdBy)
-  boards: BoardEntity[]; // Define the reverse relationship
+  public boards?: BoardEntity[]; // Define the reverse relationship
 }

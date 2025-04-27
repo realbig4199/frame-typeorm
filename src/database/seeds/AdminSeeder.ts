@@ -17,17 +17,17 @@ export default class AdminSeeder implements Seeder {
       const login = manager.getRepository(LoginEntity).create({
         passid: 'admin',
         password: hashed,
-        state: 'Activation',
+        // state: 'Activation',
       });
       await manager.getRepository(LoginEntity).save(login);
 
       const user = manager.getRepository(UserEntity).create({
-        name: 'admin',
-        email: 'admin',
-        phone: '01012345678',
+        nickName: 'admin',
+        cookingLevel: 'admin',
+        householdType: 'admin',
+        job: 'admin',
         login,
-        state: 'Activation',
-        gender: 'Unknown',
+        // state: 'Activation',
       });
       await manager.getRepository(UserEntity).save(user);
     });

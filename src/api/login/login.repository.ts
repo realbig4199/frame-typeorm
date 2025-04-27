@@ -1,7 +1,7 @@
-import { LoginEntity } from '@/database/entity/login.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { LoginEntity } from '@/database/entity/login.entity';
 
 @Injectable()
 export class LoginCustomRepository {

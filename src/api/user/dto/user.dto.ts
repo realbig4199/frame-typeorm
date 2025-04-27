@@ -1,25 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { State } from '@/common/enums/state.type';
+import { IsNumber, IsString } from 'class-validator';
 
 export class UserDto {
   @ApiProperty()
+  @IsNumber()
   id: number;
 
   @ApiProperty()
-  uuid: string;
-
-  @ApiProperty({ enum: State })
-  state: string;
+  @IsString()
+  nickName: string;
 
   @ApiProperty()
-  name: string;
+  @IsString()
+  cookingLevel: string;
 
   @ApiProperty()
-  gender: string;
+  @IsString()
+  householdType: string;
 
-  @ApiProperty({ required: false })
-  phone: string | null;
-
-  @ApiProperty({ required: false })
-  email: string | null;
+  @ApiProperty()
+  @IsString()
+  job: string;
 }

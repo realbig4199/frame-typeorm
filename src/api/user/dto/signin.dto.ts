@@ -1,12 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { LoginDto } from '@/api/login/dto/login.dto';
+import { PickType } from '@nestjs/swagger';
 
-export class SigninDtoTx {
-  @ApiProperty({ example: 'admin' })
-  @IsString()
-  public passid: string;
-
-  @ApiProperty({ example: 'recipot1!11' })
-  @IsString()
-  public password: string;
-}
+export class SigninDtoTx extends PickType(LoginDto, [
+  'passid',
+  'password',
+] as const) {}

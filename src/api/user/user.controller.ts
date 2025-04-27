@@ -22,12 +22,12 @@ import { JwtToken } from '@/api/jwt/jwt.dto';
 
 import { PaginationOptionsDto } from '@/common/dto/pagination-option.dto';
 import { JwtGuard } from '@/api/jwt/jwt.guard';
-import { GetUsersDtoRx } from './dto/getUsers.dto';
-import { GetUserDtoRx } from './dto/getUser.dto';
-import { UpdateUserDtoTx } from './dto/updateUser.dto';
+import { GetUsersDtoRx } from './dto/get-users.dto';
+import { UpdateUserDtoTx } from './dto/update-user.dto';
 import { SignupDtoTx } from './dto/signup.dto';
 import { SigninDtoTx } from './dto/signin.dto';
 import { UserService } from './user.service';
+import { GetUserDtoRx } from './dto/get-user.dto';
 
 @Controller({ path: 'user', version: '1' })
 @ApiTags('User')

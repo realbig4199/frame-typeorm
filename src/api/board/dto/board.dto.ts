@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsDate, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
-import { GetUserDtoRx } from '@/api/user/dto/getUser.dto';
+import { GetUserDtoRx } from '@/api/user/dto/get-user.dto';
 
 export class BoardDto {
   @ApiProperty({ description: '게시글 고유 ID', example: 1 })

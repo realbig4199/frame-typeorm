@@ -3,11 +3,12 @@ import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseService } from './database.service';
 import { UserEntity } from './entity/user.entity';
-import { LoginEntity } from './entity/login.entity';
+import { SocialLoginEntity } from './entity/social-login.entity';
 import { DataSource } from 'typeorm';
 import { BoardEntity } from '@/database/entity/board.entity';
 import { addTransactionalDataSource } from 'typeorm-transactional';
 import * as path from 'path'; // 경로를 위해 'path' 모듈을 임포트
+import { LoginEntity } from './entity/login.entity';
 
 @Global()
 @Module({
@@ -34,7 +35,12 @@ import * as path from 'path'; // 경로를 위해 'path' 모듈을 임포트
         return addTransactionalDataSource(dataSource);
       },
     }),
-    TypeOrmModule.forFeature([UserEntity, LoginEntity, BoardEntity]),
+    TypeOrmModule.forFeature([
+      UserEntity,
+      LoginEntity,
+      SocialLoginEntity,
+      BoardEntity,
+    ]),
   ],
   providers: [DatabaseService],
   exports: [DatabaseService, TypeOrmModule],
