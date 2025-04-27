@@ -32,7 +32,7 @@ brew install infisical/get-cli/infisical
 ```
 2. token으로 로그인
 ```sh
-infisical login --token <your_service_token_here>
+infisical login
 ```
 3. 현재 로컬 프로젝트를 Infisical 프로젝트와 연결
 ```sh
